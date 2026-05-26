@@ -724,7 +724,7 @@ tbody tr:hover{background:var(--sfr)}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs, query, orderBy, where, deleteDoc, serverTimestamp, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+import { getStorage, ref, uploadBytesResumable, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 // ── CONFIG ──────────────────────────────────────────────────────────
 const firebaseConfig = {
@@ -784,7 +784,7 @@ window.logoutModel = async () => { await signOut(auth); modelData=null; toast('S
 window.logoutAdmin = async () => { await signOut(auth); toast('Admin signed out','info'); };
 window.loginAdmin = async () => { const e=v('adminEmail'),p=v('adminPass'); if(!e||!p) return toast('Enter credentials','error'); try{ await signInWithEmailAndPassword(auth,e,p); toast('Admin access','success'); }catch(e){ toast('Admin auth failed','error'); } };
 async function loadModelDoc(uid){ const snap=await getDoc(doc(db,'models',uid)); if(snap.exists()) modelData={id:snap.id,...snap.data()}; else modelData=null; }
-function routeModel(){ if(!modelData){ showView('view-onboarding'); fetchClauses(); showStep(1); const obNameSpan=document.getElementById('ob-name'); if(obNameSpan) obNameSpan.textContent=currentUser.displayName||currentUser.email; return; } const s=modelData.status; const name=modelData.stageName||currentUser.displayName||currentUser.email; const obSpan=document.getElementById('ob-name'); if(obSpan) obSpan.textContent=name; const dashSpan=document.getElementById('dash-name'); if(dashSpan) dashSpan.textContent=name; if(s==='contracted'||s==='active'){ showView('view-model-dashboard'); loadDashboard(); loadMedia(); } else if(s==='contract_ready'){ showView('view-onboarding'); fetchClauses().then(()=>{ showStep(6); document.getElementById('s6-await').classList.add('hidden'); document.getElementById('s6-contract').classList.remove('hidden'); setTimeout(()=>initSig('sig-contract'),300); if(document.getElementById('s6-txt')) document.getElementById('s6-txt').textContent=clauses.contract; }); } else if(s==='services_selected'){ showView('view-onboarding'); fetchClauses().then(()=>{ showStep(6); document.getElementById('s6-await').classList.remove('hidden'); document.getElementById('s6-contract').classList.add('hidden'); }); } else { showView('view-onboarding'); fetchClauses().then(()=>{ const stepMap={pending:1,agreement_signed:2,consent_signed:3,nda_signed:4}; showStep(stepMap[s]||1); if(s==='consent_signed') setTimeout(()=>initSig('sig-consent'),300); if(s==='nda_signed') setTimeout(()=>initSig('sig-nda'),300); }); } }
+function routeModel(){ if(!modelData){ showView('view-onboarding'); fetchClauses(); showStep(1); const obNameSpan=document.getElementById('ob-name'); if(obNameSpan) obNameSpan.textContent=currentUser.displayName||currentUser.email; return; } const s=modelData.status; const name=modelData.stageName||currentUser.displayName||currentUser.email; const obSpan=document.getElementById('ob-name'); if(obSpan) obSpan.textContent=name; const dashSpan=document.getElementById('dash-name'); if(dashSpan) dashSpan.textContent=name; if(s==='contracted'||s==='active'){ showView('view-model-dashboard'); loadDashboard(); loadMedia(); } else if(s==='contract_ready'){ showView('view-onboarding'); fetchClauses().then(()=>{ showStep(6); document.getElementById('s6-await').classList.add('hidden'); document.getElementById('s6-contract').classList.remove('hidden'); setTimeout(()=>initSig('sig-contract'),300); if(document.getElementById('s6-txt')) document.getElementById('s6-txt').textContent=clauses.contract; }); } else if(s==='services_selected'){ showView('view-onboarding'); fetchClauses().then(()=>{ showStep(6); document.getElementById('s6-await').classList.remove('hidden'); document.getElementById('s6-contract').classList.add('hidden'); }); } else { showView('view-onboarding'); fetchClauses().then(()=>{ const stepMap={pending:1,agreement_signed:3,consent_signed:4,nda_signed:5}; showStep(stepMap[s]||1); if(s==='agreement_signed') setTimeout(()=>initSig('sig-consent'),300); if(s==='consent_signed') setTimeout(()=>initSig('sig-nda'),300); if(s==='nda_signed') loadSvcsOnboarding(); }); } }
 window.submitStep1 = async () => { if(!v('s1-legal')||!v('s1-stage')||!v('s1-dob')||!v('s1-id')) return toast('Fill required fields','error'); const age=new Date().getFullYear()-new Date(v('s1-dob')).getFullYear(); if(age<18) return toast('Must be 18+','error'); await setDoc(doc(db,'models',currentUser.uid),{legalName:v('s1-legal'),stageName:v('s1-stage'),dob:v('s1-dob'),phone:v('s1-phone'),idInfo:v('s1-id'),nationality:v('s1-nat'),address:v('s1-addr'),emergency:v('s1-emer'),status:'pending'},{merge:true}); modelData={...modelData,stageName:v('s1-stage')}; const obSpan=document.getElementById('ob-name'); if(obSpan) obSpan.textContent=v('s1-stage'); showStep(2); toast('Profile saved','success'); };
 window.submitStep2 = async () => { if(!document.getElementById('s2-agree').checked) return toast('Accept agreement','error'); await updateDoc(doc(db,'models',currentUser.uid),{status:'agreement_signed',agreementSignedAt:serverTimestamp()}); modelData.status='agreement_signed'; showStep(3); setTimeout(()=>initSig('sig-consent'),300); toast('Agreement accepted','success'); };
 window.submitStep3 = async () => { if(!document.getElementById('s3-agree').checked) return toast('Check consent box','error'); if(!sigPads['sig-consent']||sigPads['sig-consent'].isEmpty()) return toast('Provide signature','error'); const url=await uploadSig('sig-consent','consent'); await updateDoc(doc(db,'models',currentUser.uid),{status:'consent_signed',consentSignedAt:serverTimestamp(),consentSignatureUrl:url}); modelData.status='consent_signed'; showStep(4); setTimeout(()=>initSig('sig-nda'),300); toast('Consent signed','success'); };
@@ -843,7 +843,7 @@ async function loadAdminStats(){ const modelsSnap=await getDocs(collection(db,'m
 async function loadRecentSubs(){ const snap=await getDocs(query(collection(db,'models'),orderBy('createdAt','desc'),limit(5))); let html='<div class="space-y">'; snap.forEach(d=>{ const m=d.data(); html+=`<div class="flex justify-between"><span>${m.stageName||m.legalName||m.email}</span><span class="badge badge-muted">${m.status}</span></div>`; }); html+='</div>'; document.getElementById('a-recent').innerHTML=html||'<p class="text-muted">None</p>'; }
 async function fillNotifSelect(){ const models=await getDocs(collection(db,'models')); const select=document.getElementById('notif-to'); select.innerHTML='<option value="all">All Models</option>'+models.docs.map(d=>`<option value="${d.id}">${d.data().stageName||d.data().legalName||d.data().email}</option>`).join(''); }
 async function loadAdminNotifs(){ const snap=await getDocs(query(collection(db,'admin_notifications'),orderBy('createdAt','desc'))); const list=document.getElementById('a-notifs-list'); if(list) list.innerHTML=snap.docs.map(d=>`<div class="notif"><div>${d.data().message}</div><div class="notif-time">${fmtDate(d.data().createdAt)}</div></div>`).join('')||'<p class="text-muted">No notifications sent</p>'; }
-window.sendNotif = async () => { const to=v('notif-to'),msg=v('notif-msg'); if(!msg) return toast('Message empty','error'); const allModels=await getDocs(collection(db,'models')); if(to==='all'){ for(const docSnap of allModels.docs){ await addDoc(collection(db,'notifications'),{userId:docSnap.id,message:msg,read:false,createdAt:serverTimestamp()}); } } else { await addDoc(collection(db,'notifications'),{userId:to,message:msg,read:false,createdAt:serverTimestamp()}); } await addDoc(collection(db,'admin_notifications'),{recipient:to,message:msg,createdAt:serverTimestamp()}); toast('Notification sent','success'); loadAdminNotifs(); };
+window.sendNotif = async () => { const to=v('notif-to'),msg=v('notif-msg'); if(!msg) return toast('Message empty','error'); const modelsSnap=await getDocs(collection(db,'models')); if(to==='all'){ for(const docSnap of modelsSnap.docs){ await addDoc(collection(db,'notifications'),{userId:docSnap.id,message:msg,read:false,createdAt:serverTimestamp()}); } } else { await addDoc(collection(db,'notifications'),{userId:to,message:msg,read:false,createdAt:serverTimestamp()}); } await addDoc(collection(db,'admin_notifications'),{recipient:to,message:msg,createdAt:serverTimestamp()}); toast('Notification sent','success'); loadAdminNotifs(); };
 window.adminNav = (btn,id) => { document.querySelectorAll('.sb-link').forEach(l=>l.classList.remove('active')); document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active')); btn.classList.add('active'); document.getElementById(id).classList.add('active'); };
 
 // ── MEDIA UPLOAD FUNCTIONS ──────────────────────────────────────────
@@ -867,6 +867,7 @@ window.uploadMediaFiles = async (files) => {
         fileName: file.name,
         fileType: file.type,
         fileUrl: downloadUrl,
+        storagePath: storagePath,
         size: file.size,
         uploadDate: serverTimestamp(),
         mimeType: file.type
@@ -889,15 +890,16 @@ async function loadMedia() {
     const isImage = file.fileType.startsWith('image/');
     const isVideo = file.fileType.startsWith('video/');
     const card = document.createElement('div'); card.className = 'media-card';
-    card.innerHTML = `<div class="media-preview" style="background:#000;display:flex;align-items:center;justify-content:center">${isImage ? `<img src="${file.fileUrl}" style="width:100%;height:100%;object-fit:cover">` : isVideo ? `<video src="${file.fileUrl}" controls style="width:100%;height:100%;object-fit:cover"></video>` : `<span class="text-xs">${file.fileName}</span>`}</div><div class="media-info">${file.fileName}<br>${(file.size/(1024*1024)).toFixed(2)} MB</div><div class="media-actions"><a href="${file.fileUrl}" target="_blank" class="btn btn-ghost btn-sm">View</a><button class="btn btn-danger btn-sm" onclick="deleteMedia('${docSnap.id}','${file.fileUrl}')">Delete</button></div>`;
+    card.innerHTML = `<div class="media-preview" style="background:#000;display:flex;align-items:center;justify-content:center">${isImage ? `<img src="${file.fileUrl}" style="width:100%;height:100%;object-fit:cover">` : isVideo ? `<video src="${file.fileUrl}" controls style="width:100%;height:100%;object-fit:cover"></video>` : `<span class="text-xs">${file.fileName}</span>`}</div><div class="media-info">${file.fileName}<br>${(file.size/(1024*1024)).toFixed(2)} MB</div><div class="media-actions"><a href="${file.fileUrl}" target="_blank" class="btn btn-ghost btn-sm">View</a><button class="btn btn-danger btn-sm" onclick="deleteMedia('${docSnap.id}','${file.storagePath||''}')">Delete</button></div>`;
     grid.appendChild(card);
   }
 }
-window.deleteMedia = async (mediaId, fileUrl) => {
+window.deleteMedia = async (mediaId, storagePath) => {
   if(confirm('Delete this file permanently?')){
+    if(storagePath){
+      try { await deleteObject(ref(storage, storagePath)); } catch(e) { console.warn('Storage delete failed:', e); }
+    }
     try {
-      const fileRef = ref(storage, fileUrl);
-      await deleteObject(fileRef);
       await deleteDoc(doc(db,'media',mediaId));
       toast('Media deleted','info');
       loadMedia();
@@ -911,5 +913,3 @@ window.addEventListener('load',()=>{ if(!localStorage.getItem('e8_age')) documen
 </script>
 </body>
 </html>
-
-
