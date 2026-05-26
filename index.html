@@ -214,10 +214,21 @@ tbody tr:hover{background:var(--sfr)}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-thumb{background:var(--border-b);border-radius:4px}
 
-/* LANDING */
-#view-landing{display:flex;flex-direction:column}
-.hero{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:5rem 2rem;min-height:100vh}
-.hero-sep{width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:.9rem auto}
+/* LANDING - FIXED HERO (no full viewport) */
+.hero{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:2rem 1.5rem;
+  min-height:auto;
+}
+.hero-sep{
+  width:60px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  margin:0.5rem auto;
+}
 
 .admin-section{display:none}
 .admin-section.active{display:block;animation:fadeUp .3s ease}
@@ -708,10 +719,17 @@ const gProvider = new GoogleAuthProvider();
 // ── STATE ────────────────────────────────────────────────────────────
 let currentUser = null, modelData = null, clauses = {}, allSvcs = [], allModels = [], selectedSvcs = new Set(), editSvcId = null, currentFilter = 'all';
 let sigPads = {};
+let globalServicesList = []; // stores all services for admin service name resolution
 const ADMIN_EMAILS = ['admin@ei8instudios.com', 'studio@ei8in.com'];
 
 // ── GLOBAL EXPOSURE ───────────────────────────────────────────────────
-window.showView = (id) => { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); const el = document.getElementById(id); if(el) el.classList.add('active'); window.scrollTo(0,0); };
+window.showView = (id) => {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+  // only scroll to top when not landing to avoid jump on sign-in
+  if (id !== 'view-landing') window.scrollTo(0,0);
+};
 window.toast = (msg, type='info') => { const c = document.getElementById('toast-wrap'); const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg; c.appendChild(t); setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3500); };
 window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
@@ -727,7 +745,6 @@ window.clearSig = (id) => { if(sigPads[id]) sigPads[id].clear(); };
 async function uploadSig(id, type) {
   if (!sigPads[id] || sigPads[id].isEmpty()) return null;
   const data = sigPads[id].toDataURL();
-  // New path: signatures/{type}/{uid}/{timestamp}.png
   const storagePath = `signatures/${type}/${currentUser.uid}/${Date.now()}.png`;
   const sRef = ref(storage, storagePath);
   await uploadString(sRef, data, 'data_url');
@@ -763,10 +780,49 @@ window.loadAdminData = async () => { await loadClausesAdmin(); await loadAllMode
 async function loadAllModels(){ const snap=await getDocs(query(collection(db,'models'),orderBy('createdAt','desc'))); allModels=[]; snap.forEach(d=>allModels.push({id:d.id,...d.data()})); renderModels(allModels); }
 function renderModels(models){ const tb=document.getElementById('models-tbody'); if(!models.length){ tb.innerHTML='<tr><td colspan="6" class="text-center">No models</td></tr>'; return; } tb.innerHTML=models.map(m=>{ let docs=0; if(m.agreementSignedAt) docs++; if(m.consentSignedAt) docs++; if(m.ndaSignedAt) docs++; if(m.contractSignedAt) docs++; const canPromote=m.status==='services_selected'; return `<tr><td><div>${m.legalName||m.displayName||'—'}</div><div class="text-xs text-muted">${m.email}</div></td><td>${badge(m.status)}</td><td>${m.stageName||'—'}</td><td>${fmtDate(m.createdAt)}</td><td>${docs}</td><td><div class="flex gap-1"><button class="btn btn-ghost btn-sm" onclick="openModelDetail('${m.id}')">View</button>${canPromote?`<button class="btn btn-gold btn-sm" onclick="promoteModel('${m.id}')">Promote to Contract</button>`:''}<button class="btn btn-danger btn-sm" onclick="deleteModel('${m.id}')">Delete</button></div></td></tr>`; }).join(''); }
 window.filterModels = (btn,filter) => { currentFilter=filter; document.querySelectorAll('#a-models .tab').forEach(t=>t.classList.remove('active')); btn.classList.add('active'); if(filter==='all') renderModels(allModels); else renderModels(allModels.filter(m=>m.status===filter)); };
-window.openModelDetail = async (id) => { const m=allModels.find(x=>x.id===id); if(!m) return; document.getElementById('mm-title').innerHTML=`${m.stageName||m.legalName||'Model'}`; document.getElementById('mm-body').innerHTML=`<div class="space-y"><div><strong>Legal:</strong> ${m.legalName||'—'}</div><div><strong>Stage:</strong> ${m.stageName||'—'}</div><div><strong>Email:</strong> ${m.email}</div><div><strong>Status:</strong> ${badge(m.status)}</div><div><strong>Services:</strong> ${m.selectedServices?.length||0}</div><div><strong>Signed Docs:</strong> ${m.agreementSignedAt?'Agreement ✅ ':''}${m.consentSignedAt?'Consent ✅ ':''}${m.ndaSignedAt?'NDA ✅ ':''}${m.contractSignedAt?'Contract ✅':''}</div>${m.consentSignatureUrl?`<div><a href="${m.consentSignatureUrl}" target="_blank">Consent Signature</a></div>`:''}${m.ndaSignatureUrl?`<div><a href="${m.ndaSignatureUrl}" target="_blank">NDA Signature</a></div>`:''}</div>`; openModal('model-modal'); };
+window.openModelDetail = async (id) => {
+  const m = allModels.find(x => x.id === id);
+  if (!m) return;
+  // Resolve service names from globalServicesList
+  let servicesHtml = '<div><strong>Services:</strong> ';
+  if (m.selectedServices && m.selectedServices.length) {
+    const serviceNames = m.selectedServices.map(sid => {
+      const svc = globalServicesList.find(s => s.id === sid);
+      return svc ? svc.name : sid;
+    });
+    servicesHtml += serviceNames.join(', ');
+  } else {
+    servicesHtml += 'None selected';
+  }
+  servicesHtml += '</div>';
+  document.getElementById('mm-title').innerHTML = `${m.stageName || m.legalName || 'Model'}`;
+  document.getElementById('mm-body').innerHTML = `
+    <div class="space-y">
+      <div><strong>Legal:</strong> ${m.legalName || '—'}</div>
+      <div><strong>Stage:</strong> ${m.stageName || '—'}</div>
+      <div><strong>Email:</strong> ${m.email}</div>
+      <div><strong>Status:</strong> ${badge(m.status)}</div>
+      <div><strong>Signed Docs:</strong> ${m.agreementSignedAt ? 'Agreement ✅ ' : ''}${m.consentSignedAt ? 'Consent ✅ ' : ''}${m.ndaSignedAt ? 'NDA ✅ ' : ''}${m.contractSignedAt ? 'Contract ✅' : ''}</div>
+      ${servicesHtml}
+      ${m.consentSignatureUrl ? `<div><a href="${m.consentSignatureUrl}" target="_blank">Consent Signature</a></div>` : ''}
+      ${m.ndaSignatureUrl ? `<div><a href="${m.ndaSignatureUrl}" target="_blank">NDA Signature</a></div>` : ''}
+    </div>`;
+  openModal('model-modal');
+};
 window.promoteModel = async (id) => { await updateDoc(doc(db,'models',id),{status:'contract_ready',contractReadyAt:serverTimestamp()}); await addDoc(collection(db,'notifications'),{userId:id,message:'Your contract is ready! Please log in to sign.',read:false,createdAt:serverTimestamp()}); toast('Model promoted to contract_ready','success'); loadAllModels(); };
 window.deleteModel = async (id) => { if(confirm('Permanently delete model?')){ await deleteDoc(doc(db,'models',id)); toast('Model deleted','info'); loadAllModels(); } };
-async function loadAdminSvcs(){ const snap=await getDocs(collection(db,'services')); const svcs=[]; snap.forEach(d=>svcs.push({id:d.id,...d.data()})); const tbody=document.getElementById('svcs-tbody'); tbody.innerHTML=svcs.map(s=>`<tr><td><strong>${s.name}</strong></td><td>${s.category||'—'}</td><td>${s.description||''}</td><td>${s.active?'Active':'Inactive'}</td><td><button class="btn btn-ghost btn-sm" onclick="editService('${s.id}','${s.name.replace(/'/g,"\\'")}','${s.category||''}','${(s.description||'').replace(/'/g,"\\'")}','${s.active}')">Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteService('${s.id}')">Del</button></td></tr>`).join(''); }
+async function loadAdminSvcs(){
+  const snap = await getDocs(collection(db,'services'));
+  const svcs = [];
+  globalServicesList = []; // reset global service list
+  snap.forEach(d => {
+    const svc = { id: d.id, ...d.data() };
+    svcs.push(svc);
+    globalServicesList.push(svc);
+  });
+  const tbody = document.getElementById('svcs-tbody');
+  tbody.innerHTML = svcs.map(s => `<tr><td><strong>${s.name}</strong></td><td>${s.category || '—'}</td><td>${s.description || ''}</td><td>${s.active ? 'Active' : 'Inactive'}</td><td><button class="btn btn-ghost btn-sm" onclick="editService('${s.id}','${s.name.replace(/'/g, "\\'")}','${s.category || ''}','${(s.description || '').replace(/'/g, "\\'")}','${s.active}')">Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteService('${s.id}')">Del</button></td></tr>`).join('');
+}
 window.openSvcModal = () => { editSvcId=null; document.getElementById('svc-name').value=''; document.getElementById('svc-cat').value=''; document.getElementById('svc-desc').value=''; document.getElementById('svc-active').value='true'; document.getElementById('svc-modal-title').innerText='Add Service'; openModal('svc-modal'); };
 window.editService = (id,name,category,desc,active) => { editSvcId=id; document.getElementById('svc-name').value=name; document.getElementById('svc-cat').value=category; document.getElementById('svc-desc').value=desc; document.getElementById('svc-active').value=active.toString(); document.getElementById('svc-modal-title').innerText='Edit Service'; openModal('svc-modal'); };
 window.saveService = async () => { const name=v('svc-name'),cat=v('svc-cat'),desc=v('svc-desc'),active=v('svc-active')==='true'; if(!name) return toast('Service name required','error'); if(editSvcId){ await setDoc(doc(db,'services',editSvcId),{name,category:cat,description:desc,active},{merge:true}); } else { await addDoc(collection(db,'services'),{name,category:cat,description:desc,active,createdAt:serverTimestamp()}); } closeModal('svc-modal'); await loadAdminSvcs(); toast('Service saved','success'); };
@@ -784,4 +840,3 @@ window.addEventListener('load',()=>{ if(!localStorage.getItem('e8_age')) documen
 </script>
 </body>
 </html>
-
