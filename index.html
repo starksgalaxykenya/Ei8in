@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ei8-In Studios — Pleasure & Wealth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garant:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+<style>
+:root {
+  --bg: #070710;
+  --sf: #0E0E1C;
+  --sfr: #151524;
+  --sfrr: #1B1B2E;
+  --gold: #C9A84C;
+  --gold-l: #E2C97A;
+  --gold-d: #8A6E28;
+  --rose: #BE1A50;
+  --rose-l: #E8235E;
+  --text: #EDE8DF;
+  --tm: #7A7A6A;
+  --ts: #3A3A2A;
+  --border: rgba(201,168,76,0.10);
+  --border-b: rgba(201,168,76,0.28);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Jost',sans-serif;font-weight:400;line-height:1.6;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 10% 65%,rgba(201,168,76,.04) 0%,transparent 65%),radial-gradient(ellipse 50% 35% at 88% 20%,rgba(190,26,80,.05) 0%,transparent 55%);pointer-events:none;z-index:0}
+h1,h2,h3,h4{font-family:'Cormorant Garant',serif;font-weight:600;line-height:1.15}
+.view{display:none;min-height:100vh;position:relative;z-index:1}
+.view.active{display:block;animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* TYPOGRAPHY */
+.display{font-family:'Cormorant Garant',serif;font-size:clamp(2.8rem,7vw,5.5rem);font-weight:300;letter-spacing:-.02em;line-height:1}
+.display em{font-style:italic;color:var(--gold)}
+.label{font-size:.65rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.mono{font-family:'DM Mono',monospace;font-size:.8rem}
+.gold{color:var(--gold)}.rose{color:var(--rose-l)}
+.text-muted{color:var(--tm)}.text-xs{font-size:.75rem}.text-sm{font-size:.85rem}
+.font-bold{font-weight:600}.text-center{text-align:center}
+
+/* LAYOUT */
+.container{max-width:1200px;margin:0 auto;padding:0 1.5rem}
+.container-sm{max-width:500px;margin:0 auto;padding:0 1.5rem}
+.container-md{max-width:820px;margin:0 auto;padding:0 1.5rem}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+@media(max-width:768px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.hide-m{display:none!important}}
+.flex{display:flex}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-between{justify-content:space-between}.justify-center{justify-content:center}
+.gap-1{gap:.5rem}.gap-2{gap:1rem}.gap-3{gap:1.5rem}
+.mt-1{margin-top:.5rem}.mt-2{margin-top:1rem}.mt-3{margin-top:1.5rem}.mt-4{margin-top:2rem}
+.mb-1{margin-bottom:.5rem}.mb-2{margin-bottom:1rem}.mb-3{margin-bottom:1.5rem}.mb-4{margin-bottom:2rem}
+.p-2{padding:1rem}.p-3{padding:1.5rem}.p-4{padding:2rem}.w-full{width:100%}.hidden{display:none!important}
+.space-y > * + *{margin-top:.75rem}
+
+/* CARDS */
+.card{background:var(--sf);border:1px solid var(--border);border-radius:.875rem;padding:1.25rem}
+.card-gold{background:linear-gradient(140deg,var(--sfr),var(--sf));border:1px solid var(--border-b);border-radius:.875rem;position:relative;overflow:hidden}
+.card-gold::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border-b),transparent);margin:1.25rem 0}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.7rem 1.6rem;border-radius:.5rem;font-family:'Jost',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.05em;cursor:pointer;transition:all .2s;border:none;text-decoration:none;white-space:nowrap}
+.btn-gold{background:linear-gradient(135deg,var(--gold-d),var(--gold));color:#0A0808;box-shadow:0 4px 18px rgba(201,168,76,.18)}
+.btn-gold:hover{background:linear-gradient(135deg,var(--gold),var(--gold-l));box-shadow:0 4px 28px rgba(201,168,76,.3);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--tm);border:1px solid var(--border-b)}
+.btn-ghost:hover{color:var(--text);background:var(--sfr);border-color:var(--border-b)}
+.btn-rose{background:var(--rose);color:#fff}
+.btn-rose:hover{background:var(--rose-l);transform:translateY(-1px)}
+.btn-danger{background:rgba(220,38,38,.12);color:#f87171;border:1px solid rgba(220,38,38,.18)}
+.btn-danger:hover{background:rgba(220,38,38,.22)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.btn-sm{padding:.38rem .9rem;font-size:.72rem}
+.btn-lg{padding:1rem 2.4rem;font-size:.92rem}
+.btn-full{width:100%}
+
+/* INPUTS */
+.input-group{margin-bottom:1.1rem}
+.input-label{display:block;font-size:.65rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--tm);margin-bottom:.35rem}
+input[type=text],input[type=email],input[type=password],input[type=date],input[type=tel],input[type=number],select,textarea{width:100%;background:var(--sfrr);border:1px solid var(--border);border-radius:.45rem;padding:.7rem 1rem;color:var(--text);font-family:'Jost',sans-serif;font-size:.88rem;outline:none;transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--gold-d);box-shadow:0 0 0 3px rgba(201,168,76,.07)}
+input::placeholder{color:var(--ts)}
+textarea{resize:vertical;min-height:100px}
+select option{background:var(--sfr)}
+.checkbox-label{display:flex;align-items:flex-start;gap:.65rem;cursor:pointer;font-size:.88rem;color:var(--tm);line-height:1.5}
+input[type=checkbox]{width:17px;height:17px;min-width:17px;margin-top:2px;accent-color:var(--gold);cursor:pointer}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:.18rem .55rem;border-radius:100px;font-size:.62rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.badge-gold{background:rgba(201,168,76,.1);color:var(--gold);border:1px solid rgba(201,168,76,.2)}
+.badge-green{background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
+.badge-red{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2)}
+.badge-blue{background:rgba(59,130,246,.1);color:#60a5fa;border:1px solid rgba(59,130,246,.2)}
+.badge-purple{background:rgba(168,85,247,.1);color:#c084fc;border:1px solid rgba(168,85,247,.2)}
+.badge-muted{background:rgba(255,255,255,.04);color:var(--tm);border:1px solid var(--border)}
+
+/* NAVBAR */
+.navbar{position:sticky;top:0;z-index:100;background:rgba(7,7,16,.88);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:.9rem 1.5rem}
+.navbar-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.brand{display:flex;align-items:center;gap:.75rem;text-decoration:none}
+.brand-logo{width:38px;height:38px;border-radius:9px;background:linear-gradient(135deg,var(--gold-d),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garant',serif;font-size:1.1rem;font-weight:700;color:#0A0808;flex-shrink:0}
+.brand-name{font-family:'Cormorant Garant',serif;font-size:1.25rem;font-weight:600;letter-spacing:.04em;color:var(--text)}
+.brand-tag{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);display:block;line-height:1.2}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:.65rem 1.1rem;font-size:.75rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--tm);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;background:none;border-left:none;border-right:none;border-top:none;font-family:'Jost',sans-serif}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-content{display:none}.tab-content.active{display:block}
+
+/* STEPPER */
+.stepper{display:flex;align-items:flex-start;padding:1.5rem 0 2rem}
+.step{display:flex;flex-direction:column;align-items:center;gap:.35rem;flex:1;position:relative}
+.step::after{content:'';position:absolute;top:13px;left:55%;right:-5%;height:1px;background:var(--border);z-index:0}
+.step:last-child::after{display:none}
+.step-icon{width:27px;height:27px;border-radius:50%;border:1.5px solid var(--border-b);background:var(--sf);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:600;color:var(--tm);position:relative;z-index:1;transition:all .3s}
+.step.done .step-icon{background:var(--gold-d);border-color:var(--gold);color:#0a0808;font-size:.7rem}
+.step.active .step-icon{background:var(--sf);border-color:var(--gold);color:var(--gold);box-shadow:0 0 14px rgba(201,168,76,.3)}
+.step-label{font-size:.57rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ts);text-align:center}
+.step.active .step-label{color:var(--gold)}
+.step.done .step-label{color:var(--tm)}
+
+/* CLAUSE BOX */
+.clause-box{background:var(--sfrr);border:1px solid var(--border);border-radius:.45rem;padding:1.1rem;height:220px;overflow-y:auto;font-size:.82rem;line-height:1.85;color:var(--tm);white-space:pre-wrap;scrollbar-width:thin}
+.clause-box::-webkit-scrollbar{width:3px}
+.clause-box::-webkit-scrollbar-thumb{background:var(--gold-d);border-radius:3px}
+
+/* SIGNATURE */
+.sig-wrap{background:#fff;border-radius:.45rem;border:1px solid var(--border-b);overflow:hidden}
+.sig-wrap canvas{width:100%;height:150px;display:block;cursor:crosshair}
+
+/* SERVICE CARDS */
+.service-card{background:var(--sfr);border:1px solid var(--border);border-radius:.75rem;padding:1.1rem;cursor:pointer;transition:all .2s;position:relative}
+.service-card:hover{border-color:var(--border-b)}
+.service-card.selected{border-color:var(--gold);background:rgba(201,168,76,.05);box-shadow:0 0 18px rgba(201,168,76,.1)}
+.service-card .chk{position:absolute;top:.7rem;right:.7rem;width:19px;height:19px;border-radius:50%;background:var(--sfrr);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.6rem;color:transparent;transition:all .2s}
+.service-card.selected .chk{background:var(--gold);border-color:var(--gold);color:#0a0808}
+
+/* STATS */
+.stat-card{background:var(--sfr);border:1px solid var(--border);border-radius:.75rem;padding:1.1rem}
+.stat-value{font-family:'Cormorant Garant',serif;font-size:2.3rem;font-weight:600;line-height:1;color:var(--gold)}
+.stat-label{font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--tm);margin-top:.2rem}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:1.4rem}
+.timeline::before{content:'';position:absolute;left:5px;top:4px;bottom:4px;width:1px;background:var(--border)}
+.tl-item{position:relative;padding-bottom:1.1rem}
+.tl-item::before{content:'';position:absolute;left:-1.4rem;top:4px;width:11px;height:11px;border-radius:50%;background:var(--sfrr);border:1.5px solid var(--border-b);z-index:1}
+.tl-item.done::before{background:var(--gold-d);border-color:var(--gold)}
+.tl-item.current::before{background:var(--sf);border-color:var(--gold);box-shadow:0 0 9px rgba(201,168,76,.5)}
+.tl-title{font-size:.85rem;font-weight:500}.tl-sub{font-size:.72rem;color:var(--tm);margin-top:.1rem}
+
+/* NOTIFICATION */
+.notif{background:var(--sfr);border-left:2.5px solid var(--gold-d);border-radius:0 .45rem .45rem 0;padding:.65rem .9rem;margin-bottom:.6rem}
+.notif.unread{border-left-color:var(--rose-l)}
+.notif-msg{font-size:.85rem}.notif-time{font-size:.7rem;color:var(--tm);margin-top:.15rem}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;border-radius:.75rem;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:.83rem}
+thead{background:var(--sfr);border-bottom:1px solid var(--border)}
+th{padding:.7rem 1rem;text-align:left;font-size:.62rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--tm)}
+td{padding:.8rem 1rem;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:var(--sfr)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal{background:var(--sf);border:1px solid var(--border-b);border-radius:1.1rem;max-width:640px;width:100%;max-height:90vh;overflow-y:auto;padding:2rem}
+
+/* TOAST */
+#toast-wrap{position:fixed;bottom:1.5rem;right:1.5rem;z-index:300;display:flex;flex-direction:column;gap:.4rem}
+.toast{background:var(--sfrr);border:1px solid var(--border-b);border-radius:.45rem;padding:.65rem 1.1rem;font-size:.82rem;max-width:300px;box-shadow:0 8px 28px rgba(0,0,0,.45);animation:slideIn .25s ease}
+.toast.success{border-left:3px solid #4ade80}.toast.error{border-left:3px solid #f87171}.toast.info{border-left:3px solid var(--gold)}
+@keyframes slideIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+
+/* ALERTS */
+.alert{padding:.8rem 1rem;border-radius:.45rem;font-size:.83rem;margin-bottom:.9rem}
+.alert-info{background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.2);color:var(--gold-l)}
+.alert-error{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.18);color:#fca5a5}
+.alert-success{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.18);color:#86efac}
+
+/* LOADER */
+.loader{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .75s linear infinite;margin:1.5rem auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ADMIN LAYOUT */
+.admin-layout{display:flex;min-height:calc(100vh - 62px)}
+.sidebar{width:210px;min-width:210px;background:var(--sf);border-right:1px solid var(--border);padding:1.25rem 0;flex-shrink:0}
+.sb-link{display:flex;align-items:center;gap:.65rem;padding:.65rem 1.25rem;font-size:.82rem;color:var(--tm);cursor:pointer;transition:all .2s;border-left:2px solid transparent;border-right:none;border-top:none;border-bottom:none;background:none;font-family:'Jost',sans-serif;width:100%;text-align:left}
+.sb-link:hover{color:var(--text);background:var(--sfr)}
+.sb-link.active{color:var(--gold);border-left-color:var(--gold);background:rgba(201,168,76,.05)}
+.sb-section{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ts);padding:.9rem 1.25rem .3rem;font-weight:600}
+.admin-main{flex:1;padding:2rem;overflow-y:auto}
+@media(max-width:768px){.sidebar{display:none}}
+
+/* AGE GATE */
+#age-gate{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2rem;padding:2rem;text-align:center}
+#age-gate::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(201,168,76,.05) 0%,transparent 70%);pointer-events:none}
+
+/* SECTION HEADER */
+.sec-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap}
+.sec-title{font-size:1.8rem}.sec-sub{font-size:.78rem;color:var(--tm);margin-top:.2rem}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--border-b);border-radius:4px}
+
+/* LANDING */
+#view-landing{display:flex;flex-direction:column}
+.hero{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:5rem 2rem;min-height:100vh}
+.hero-sep{width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:.9rem auto}
+
+.admin-section{display:none}
+.admin-section.active{display:block;animation:fadeUp .3s ease}
+</style>
+</head>
+<body>
+
+<!-- AGE GATE -->
+<div id="age-gate">
+  <div style="position:relative;z-index:1">
+    <div class="brand-logo" style="width:52px;height:52px;font-size:1.4rem;margin:0 auto 1rem">E8</div>
+    <h1 style="font-family:'Cormorant Garant',serif;font-size:2rem">Ei8-In Studios</h1>
+    <p class="label mt-1">Pleasure &amp; Wealth</p>
+  </div>
+  <div class="card" style="max-width:420px;text-align:left;position:relative;z-index:1">
+    <p class="label mb-2">⚠ Age Verification Required</p>
+    <p class="text-sm text-muted" style="line-height:1.75">This portal is strictly for individuals <strong style="color:var(--text)">18 years of age or older</strong>. It contains adult-oriented content and legally binding agreements related to the adult entertainment industry.</p>
+    <p class="text-sm text-muted mt-2" style="line-height:1.75">By entering, you confirm you are a legal adult in your jurisdiction and voluntarily consent to engage with this content.</p>
+    <div class="divider"></div>
+    <div class="flex gap-1">
+      <button onclick="enterSite()" class="btn btn-gold btn-full">I Am 18+ &mdash; Enter</button>
+      <button onclick="window.location.href='https://google.com'" class="btn btn-ghost btn-full">Exit</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast-wrap"></div>
+
+<!-- ========================================================== -->
+<!-- LANDING                                                      -->
+<!-- ========================================================== -->
+<div id="view-landing" class="view">
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="brand">
+        <div class="brand-logo">E8</div>
+        <div><span class="brand-name">Ei8-In Studios</span><span class="brand-tag">Pleasure &amp; Wealth</span></div>
+      </div>
+    </div>
+  </nav>
+  <div class="hero">
+    <div style="max-width:620px">
+      <p class="label mb-2">Welcome to</p>
+      <h1 class="display" style="margin-bottom:.6rem">Ei8-In <em>Studios</em></h1>
+      <div class="hero-sep"></div>
+      <p class="text-muted mt-3 mb-4" style="font-size:1rem;line-height:1.9;max-width:480px;margin-left:auto;margin-right:auto">The premier model management platform. Streamlined onboarding, legal compliance, and talent administration &mdash; refined for the modern industry.</p>
+      <div class="flex gap-2 justify-center" style="flex-wrap:wrap">
+        <button onclick="showView('view-model-auth')" class="btn btn-gold btn-lg">↗ Model Portal</button>
+        <button onclick="showView('view-admin-auth')" class="btn btn-ghost btn-lg">Admin Access →</button>
+      </div>
+      <p class="text-xs text-muted mt-4">Strictly 18+ &bull; Adult Content Industry &bull; All Data Encrypted &bull; Confidential</p>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- MODEL AUTH                                                   -->
+<!-- ========================================================== -->
+<div id="view-model-auth" class="view">
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="brand"><div class="brand-logo">E8</div><div><span class="brand-name">Ei8-In Studios</span><span class="brand-tag">Model Portal</span></div></div>
+      <button onclick="showView('view-landing')" class="btn btn-ghost btn-sm">← Back</button>
+    </div>
+  </nav>
+  <div class="container-sm" style="padding-top:3rem;padding-bottom:3rem">
+    <div class="card-gold p-4">
+      <div class="tabs mb-4">
+        <button class="tab active" onclick="switchAuthTab(this,'auth-login')">Sign In</button>
+        <button class="tab" onclick="switchAuthTab(this,'auth-register')">Create Account</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="auth-login" class="tab-content active">
+        <p class="label mb-3">Model Login</p>
+        <div class="input-group"><label class="input-label">Email</label><input type="email" id="loginEmail" placeholder="your@email.com"></div>
+        <div class="input-group"><label class="input-label">Password</label><input type="password" id="loginPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')loginModel()"></div>
+        <button onclick="loginModel()" class="btn btn-gold btn-full mb-2">Sign In to Portal</button>
+        <div class="divider"></div>
+        <button onclick="loginWithGoogle()" class="btn btn-ghost btn-full" style="border-color:var(--border-b)">
+          <svg width="15" height="15" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.27 9.77A7.3 7.3 0 0 1 12 4.7c1.9 0 3.6.67 4.94 1.77L20.22 3.2A11.95 11.95 0 0 0 12 0C7.32 0 3.26 2.7 1.28 6.63l3.99 3.14Z"/><path fill="#FBBC05" d="M16.04 18.01A7.28 7.28 0 0 1 12 19.3c-2.96 0-5.51-1.77-6.73-4.33l-3.99 3.09A12 12 0 0 0 12 24c3.24 0 6.19-1.16 8.45-3.08l-4.41-2.91Z"/><path fill="#4285F4" d="M20.45 13.73c.12-.55.18-1.15.18-1.73 0-.55-.06-1.1-.17-1.61H12v3.62h4.78a4.07 4.07 0 0 1-1.74 2.7l4.41 2.9c2.57-2.37 4-5.89 4-9.61"/><path fill="#34A853" d="M5.27 14.23A7.4 7.4 0 0 1 4.7 12c0-.77.12-1.52.35-2.23L1.06 6.63A12 12 0 0 0 0 12c0 1.93.46 3.75 1.28 5.37l3.99-3.14Z"/></svg>
+          Continue with Google
+        </button>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="auth-register" class="tab-content">
+        <p class="label mb-3">New Model Registration</p>
+        <div class="grid-2">
+          <div class="input-group"><label class="input-label">First Name</label><input type="text" id="regFirst" placeholder="First"></div>
+          <div class="input-group"><label class="input-label">Last Name</label><input type="text" id="regLast" placeholder="Last"></div>
+        </div>
+        <div class="input-group"><label class="input-label">Email</label><input type="email" id="regEmail" placeholder="your@email.com"></div>
+        <div class="input-group"><label class="input-label">Password</label><input type="password" id="regPass" placeholder="Min. 8 characters"></div>
+        <div class="input-group"><label class="input-label">Confirm Password</label><input type="password" id="regPassC" placeholder="Repeat password"></div>
+        <label class="checkbox-label mb-3"><input type="checkbox" id="regAge18"><span>I confirm I am at least 18 years of age</span></label>
+        <label class="checkbox-label mb-3"><input type="checkbox" id="regTerms"><span>I agree to the Terms of Service and Privacy Policy</span></label>
+        <button onclick="registerModel()" class="btn btn-gold btn-full mb-2">Create Account</button>
+        <div class="divider"></div>
+        <button onclick="loginWithGoogle()" class="btn btn-ghost btn-full" style="border-color:var(--border-b)">
+          <svg width="15" height="15" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.27 9.77A7.3 7.3 0 0 1 12 4.7c1.9 0 3.6.67 4.94 1.77L20.22 3.2A11.95 11.95 0 0 0 12 0C7.32 0 3.26 2.7 1.28 6.63l3.99 3.14Z"/><path fill="#FBBC05" d="M16.04 18.01A7.28 7.28 0 0 1 12 19.3c-2.96 0-5.51-1.77-6.73-4.33l-3.99 3.09A12 12 0 0 0 12 24c3.24 0 6.19-1.16 8.45-3.08l-4.41-2.91Z"/><path fill="#4285F4" d="M20.45 13.73c.12-.55.18-1.15.18-1.73 0-.55-.06-1.1-.17-1.61H12v3.62h4.78a4.07 4.07 0 0 1-1.74 2.7l4.41 2.9c2.57-2.37 4-5.89 4-9.61"/><path fill="#34A853" d="M5.27 14.23A7.4 7.4 0 0 1 4.7 12c0-.77.12-1.52.35-2.23L1.06 6.63A12 12 0 0 0 0 12c0 1.93.46 3.75 1.28 5.37l3.99-3.14Z"/></svg>
+          Sign up with Google
+        </button>
+      </div>
+    </div>
+    <p class="text-xs text-muted text-center mt-3">By accessing this portal you confirm you are 18+ and consent to our terms.</p>
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- ONBOARDING                                                   -->
+<!-- ========================================================== -->
+<div id="view-onboarding" class="view">
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="brand"><div class="brand-logo">E8</div><div><span class="brand-name">Ei8-In Studios</span><span class="brand-tag">Model Onboarding</span></div></div>
+      <div class="flex items-center gap-2">
+        <span id="ob-name" class="text-sm text-muted hide-m"></span>
+        <button onclick="logoutModel()" class="btn btn-ghost btn-sm">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+  <div class="container-md" style="padding-top:1.5rem;padding-bottom:3rem">
+    <!-- Stepper -->
+    <div class="stepper" id="stepper">
+      <div class="step" data-step="1"><div class="step-icon">1</div><span class="step-label">Profile</span></div>
+      <div class="step" data-step="2"><div class="step-icon">2</div><span class="step-label">Agreement</span></div>
+      <div class="step" data-step="3"><div class="step-icon">3</div><span class="step-label">Consent</span></div>
+      <div class="step" data-step="4"><div class="step-icon">4</div><span class="step-label">NDA</span></div>
+      <div class="step" data-step="5"><div class="step-icon">5</div><span class="step-label">Services</span></div>
+      <div class="step" data-step="6"><div class="step-icon">6</div><span class="step-label">Contract</span></div>
+    </div>
+
+    <!-- STEP 1: Personal Info -->
+    <div id="step-1" class="hidden">
+      <div class="card-gold p-4">
+        <p class="label mb-1">Step 1 of 6</p>
+        <h2 style="font-size:1.8rem" class="mb-1">Personal <em style="font-style:italic;color:var(--gold)">Information</em></h2>
+        <p class="text-sm text-muted mb-4">Your legal details are required for compliance. All data is encrypted and stored securely.</p>
+        <div class="grid-2">
+          <div class="input-group"><label class="input-label">Legal Full Name *</label><input type="text" id="s1-legal" placeholder="As per government ID"></div>
+          <div class="input-group"><label class="input-label">Stage / Professional Name *</label><input type="text" id="s1-stage" placeholder="Working name"></div>
+          <div class="input-group"><label class="input-label">Date of Birth *</label><input type="date" id="s1-dob"></div>
+          <div class="input-group"><label class="input-label">Phone Number</label><input type="tel" id="s1-phone" placeholder="+1 555 000 0000"></div>
+          <div class="input-group"><label class="input-label">Govt. ID Type &amp; Number *</label><input type="text" id="s1-id" placeholder="e.g. Passport #A12345"></div>
+          <div class="input-group"><label class="input-label">Nationality</label><input type="text" id="s1-nat" placeholder="Country"></div>
+        </div>
+        <div class="input-group"><label class="input-label">Residential Address</label><textarea id="s1-addr" placeholder="Full address" style="min-height:72px"></textarea></div>
+        <div class="input-group"><label class="input-label">Emergency Contact</label><input type="text" id="s1-emer" placeholder="Name & phone number"></div>
+        <div class="flex justify-between mt-3"><div></div><button onclick="submitStep1()" class="btn btn-gold">Save &amp; Continue →</button></div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Agreement -->
+    <div id="step-2" class="hidden">
+      <div class="card-gold p-4">
+        <p class="label mb-1">Step 2 of 6</p>
+        <h2 style="font-size:1.8rem" class="mb-1">Model <em style="font-style:italic;color:var(--gold)">Agreement</em></h2>
+        <p class="text-sm text-muted mb-3">Read the full agreement carefully before proceeding.</p>
+        <div class="clause-box mb-3" id="s2-txt">Loading agreement...</div>
+        <label class="checkbox-label mb-4"><input type="checkbox" id="s2-agree"><span>I have read, understood, and agree to be bound by the terms of this Model Agreement.</span></label>
+        <div class="flex justify-between"><button onclick="showStep(1)" class="btn btn-ghost">← Back</button><button onclick="submitStep2()" class="btn btn-gold">Accept &amp; Continue →</button></div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Consent -->
+    <div id="step-3" class="hidden">
+      <div class="card-gold p-4">
+        <p class="label mb-1">Step 3 of 6</p>
+        <h2 style="font-size:1.8rem" class="mb-1">Consent <em style="font-style:italic;color:var(--gold)">Form</em></h2>
+        <p class="text-sm text-muted mb-3">Read the consent form and provide your digital signature below.</p>
+        <div class="clause-box mb-3" id="s3-txt">Loading consent form...</div>
+        <label class="checkbox-label mb-3"><input type="checkbox" id="s3-agree"><span>I freely and voluntarily provide the consent described above.</span></label>
+        <div class="input-group">
+          <label class="input-label">Digital Signature — draw below</label>
+          <div class="sig-wrap"><canvas id="sig-consent"></canvas></div>
+          <button type="button" onclick="clearSig('sig-consent')" class="btn btn-ghost btn-sm mt-1">Clear Signature</button>
+        </div>
+        <div class="flex justify-between mt-2"><button onclick="showStep(2)" class="btn btn-ghost">← Back</button><button onclick="submitStep3()" class="btn btn-gold">Sign &amp; Continue →</button></div>
+      </div>
+    </div>
+
+    <!-- STEP 4: NDA -->
+    <div id="step-4" class="hidden">
+      <div class="card-gold p-4">
+        <p class="label mb-1">Step 4 of 6</p>
+        <h2 style="font-size:1.8rem" class="mb-1">Non-Disclosure <em style="font-style:italic;color:var(--gold)">Agreement</em></h2>
+        <p class="text-sm text-muted mb-3">This NDA protects both parties. Please read carefully.</p>
+        <div class="clause-box mb-3" id="s4-txt">Loading NDA...</div>
+        <label class="checkbox-label mb-3"><input type="checkbox" id="s4-agree"><span>I agree to be bound by this Non-Disclosure Agreement.</span></label>
+        <div class="input-group">
+          <label class="input-label">Digital Signature</label>
+          <div class="sig-wrap"><canvas id="sig-nda"></canvas></div>
+          <button type="button" onclick="clearSig('sig-nda')" class="btn btn-ghost btn-sm mt-1">Clear</button>
+        </div>
+        <div class="flex justify-between mt-2"><button onclick="showStep(3)" class="btn btn-ghost">← Back</button><button onclick="submitStep4()" class="btn btn-gold">Sign &amp; Continue →</button></div>
+      </div>
+    </div>
+
+    <!-- STEP 5: Services -->
+    <div id="step-5" class="hidden">
+      <div class="card-gold p-4">
+        <p class="label mb-1">Step 5 of 6</p>
+        <h2 style="font-size:1.8rem" class="mb-1">Select <em style="font-style:italic;color:var(--gold)">Services</em></h2>
+        <p class="text-sm text-muted mb-4">Choose the services you wish to offer. These can be updated after approval.</p>
+        <div id="s5-grid" class="grid-2 mb-4"><div class="loader"></div></div>
+        <div class="flex justify-between"><button onclick="showStep(4)" class="btn btn-ghost">← Back</button><button onclick="submitStep5()" class="btn btn-gold">Submit Application →</button></div>
+      </div>
+    </div>
+
+    <!-- STEP 6: Awaiting / Contract -->
+    <div id="step-6" class="hidden">
+      <!-- Awaiting -->
+      <div id="s6-await" class="card-gold p-4 text-center">
+        <div style="font-size:3rem;margin-bottom:1rem">⏳</div>
+        <h2 style="font-size:1.8rem" class="mb-2">Application <em style="font-style:italic;color:var(--gold)">Under Review</em></h2>
+        <p class="text-sm text-muted mb-4" style="max-width:420px;margin-left:auto;margin-right:auto">Your application has been submitted. Our team will review your documents and notify you when your contract is ready to sign.</p>
+        <div class="card" style="max-width:400px;margin:0 auto;text-align:left"><p class="label mb-2">Submitted Summary</p><div id="s6-summary" class="text-sm text-muted" style="line-height:2"></div></div>
+        <button onclick="showView('view-model-dashboard')" class="btn btn-gold mt-4">Go to My Dashboard →</button>
+      </div>
+      <!-- Contract Ready -->
+      <div id="s6-contract" class="card-gold p-4 hidden">
+        <p class="label mb-1">Final Step</p>
+        <h2 style="font-size:1.8rem" class="mb-1">Sign Your <em style="font-style:italic;color:var(--gold)">Contract</em></h2>
+        <p class="text-sm text-muted mb-3">Your contract is ready. Please read carefully and sign to begin your journey with Ei8-In Studios.</p>
+        <div class="clause-box mb-3" id="s6-txt">Loading contract...</div>
+        <label class="checkbox-label mb-3"><input type="checkbox" id="s6-agree"><span>I have read and agree to all terms of this Contract with Ei8-In Studios.</span></label>
+        <div class="input-group">
+          <label class="input-label">Final Digital Signature</label>
+          <div class="sig-wrap"><canvas id="sig-contract"></canvas></div>
+          <button type="button" onclick="clearSig('sig-contract')" class="btn btn-ghost btn-sm mt-1">Clear</button>
+        </div>
+        <div class="flex justify-between mt-2"><div></div><button onclick="submitContract()" class="btn btn-gold">Sign Contract &amp; Activate →</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- MODEL DASHBOARD                                             -->
+<!-- ========================================================== -->
+<div id="view-model-dashboard" class="view">
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="brand"><div class="brand-logo">E8</div><div><span class="brand-name">Ei8-In Studios</span><span class="brand-tag">My Dashboard</span></div></div>
+      <div class="flex items-center gap-2">
+        <span id="dash-name" class="text-sm text-muted hide-m"></span>
+        <button onclick="logoutModel()" class="btn btn-ghost btn-sm">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+  <div class="container" style="padding-top:2rem;padding-bottom:3rem">
+    <div class="tabs mb-4">
+      <button class="tab active" onclick="dashTab(this,'d-overview')">Overview</button>
+      <button class="tab" onclick="dashTab(this,'d-docs')">My Documents</button>
+      <button class="tab" onclick="dashTab(this,'d-services')">My Services</button>
+      <button class="tab" onclick="dashTab(this,'d-profile')">Profile</button>
+      <button class="tab" onclick="dashTab(this,'d-notifs')">Notifications <span id="notif-badge" class="badge badge-red hidden" style="margin-left:4px;vertical-align:middle"></span></button>
+    </div>
+
+    <!-- Overview -->
+    <div id="d-overview" class="tab-content active">
+      <div id="d-contract-prompt" class="hidden">
+        <div class="alert alert-info flex items-center justify-between gap-2 mb-4" style="flex-wrap:wrap">
+          <div><strong class="gold">🎉 Your contract is ready!</strong><p class="text-sm mt-1">Ei8-In Studios has approved your application. Sign to complete your onboarding.</p></div>
+          <button onclick="goContractStep()" class="btn btn-gold btn-sm">Sign Now →</button>
+        </div>
+      </div>
+      <div class="grid-4 mb-4">
+        <div class="stat-card"><div class="stat-value" id="d-stat-status" style="font-size:1rem;word-break:break-word">—</div><div class="stat-label">Status</div></div>
+        <div class="stat-card"><div class="stat-value" id="d-stat-docs">0</div><div class="stat-label">Docs Signed</div></div>
+        <div class="stat-card"><div class="stat-value" id="d-stat-svcs">0</div><div class="stat-label">Services</div></div>
+        <div class="stat-card"><div class="stat-value" id="d-stat-joined" style="font-size:1.1rem">—</div><div class="stat-label">Member Since</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><p class="label mb-3">Onboarding Journey</p><div class="timeline" id="d-timeline"><div class="loader"></div></div></div>
+        <div class="card"><p class="label mb-2">Recent Notifications</p><div id="d-recent-notifs"><p class="text-sm text-muted">No notifications.</p></div></div>
+      </div>
+    </div>
+
+    <!-- Documents -->
+    <div id="d-docs" class="tab-content">
+      <div class="sec-header"><div><h2 class="sec-title">My Documents</h2><p class="sec-sub">All signed legal documents</p></div></div>
+      <div id="docs-list" class="space-y"><div class="loader"></div></div>
+    </div>
+
+    <!-- Services -->
+    <div id="d-services" class="tab-content">
+      <div class="sec-header"><div><h2 class="sec-title">My Services</h2><p class="sec-sub">Services you are enrolled in</p></div></div>
+      <div id="svcs-list" class="grid-2"><div class="loader"></div></div>
+    </div>
+
+    <!-- Profile -->
+    <div id="d-profile" class="tab-content">
+      <div class="sec-header"><div><h2 class="sec-title">My Profile</h2><p class="sec-sub">Information on file</p></div></div>
+      <div class="card-gold p-4" id="d-profile-content"><div class="loader"></div></div>
+    </div>
+
+    <!-- Notifications -->
+    <div id="d-notifs" class="tab-content">
+      <div class="sec-header"><div><h2 class="sec-title">Notifications</h2><p class="sec-sub">Messages from Ei8-In Studios</p></div></div>
+      <div id="notifs-list"><div class="loader"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- ADMIN AUTH                                                   -->
+<!-- ========================================================== -->
+<div id="view-admin-auth" class="view">
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="brand"><div class="brand-logo">E8</div><div><span class="brand-name">Ei8-In Studios</span><span class="brand-tag">Administration</span></div></div>
+      <button onclick="showView('view-landing')" class="btn btn-ghost btn-sm">← Back</button>
+    </div>
+  </nav>
+  <div class="container-sm" style="padding-top:3rem;padding-bottom:3rem">
+    <div class="card-gold p-4">
+      <p class="label mb-1">Restricted Access</p>
+      <h2 style="font-size:1.8rem" class="mb-3">Admin <em style="font-style:italic;color:var(--gold)">Authentication</em></h2>
+      <div class="alert alert-info mb-3" style="font-size:.8rem">Authorized Ei8-In Studios management personnel only.</div>
+      <div class="input-group"><label class="input-label">Admin Email</label><input type="email" id="adminEmail" placeholder="admin@ei8instudios.com"></div>
+      <div class="input-group"><label class="input-label">Password</label><input type="password" id="adminPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')loginAdmin()"></div>
+      <button onclick="loginAdmin()" class="btn btn-gold btn-full">Authenticate →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- ADMIN DASHBOARD                                             -->
+<!-- ========================================================== -->
+<div id="view-admin-dashboard" class="view">
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="brand"><div class="brand-logo">E8</div><div><span class="brand-name">Ei8-In Studios</span><span class="brand-tag">Admin Panel</span></div></div>
+      <div class="flex items-center gap-2">
+        <span id="admin-name" class="text-sm text-muted hide-m"></span>
+        <button onclick="logoutAdmin()" class="btn btn-ghost btn-sm">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sb-section">Management</div>
+      <button class="sb-link active" onclick="adminNav(this,'a-overview')">📊 Overview</button>
+      <button class="sb-link" onclick="adminNav(this,'a-models')">👤 Models</button>
+      <div class="sb-section">Content</div>
+      <button class="sb-link" onclick="adminNav(this,'a-clauses')">📄 Clause Editor</button>
+      <button class="sb-link" onclick="adminNav(this,'a-services')">🛍 Services</button>
+      <div class="sb-section">Communication</div>
+      <button class="sb-link" onclick="adminNav(this,'a-notifs')">🔔 Notifications</button>
+    </aside>
+    <main class="admin-main">
+
+      <!-- OVERVIEW -->
+      <section id="a-overview" class="admin-section active">
+        <div class="sec-header">
+          <div><h2 class="sec-title">Overview</h2><p class="sec-sub">Studio management at a glance</p></div>
+          <button onclick="loadAdminData()" class="btn btn-ghost btn-sm">↻ Refresh</button>
+        </div>
+        <div class="grid-4 mb-4">
+          <div class="stat-card"><div class="stat-value" id="a-total">—</div><div class="stat-label">Total Models</div></div>
+          <div class="stat-card"><div class="stat-value" id="a-pending">—</div><div class="stat-label">Pending Review</div></div>
+          <div class="stat-card"><div class="stat-value" id="a-contracted">—</div><div class="stat-label">Contracted</div></div>
+          <div class="stat-card"><div class="stat-value" id="a-svcs">—</div><div class="stat-label">Active Services</div></div>
+        </div>
+        <div class="card"><p class="label mb-3">Recent Submissions</p><div id="a-recent"><div class="loader"></div></div></div>
+      </section>
+
+      <!-- MODELS -->
+      <section id="a-models" class="admin-section">
+        <div class="sec-header"><div><h2 class="sec-title">Model Management</h2><p class="sec-sub">All registered models</p></div></div>
+        <div class="tabs mb-4">
+          <button class="tab active" onclick="filterModels(this,'all')">All</button>
+          <button class="tab" onclick="filterModels(this,'pending')">Pending</button>
+          <button class="tab" onclick="filterModels(this,'services_selected')">Awaiting Contract</button>
+          <button class="tab" onclick="filterModels(this,'contract_ready')">Contract Ready</button>
+          <button class="tab" onclick="filterModels(this,'contracted')">Contracted</button>
+          <button class="tab" onclick="filterModels(this,'active')">Active</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Model</th><th>Status</th><th>Stage Name</th><th>Joined</th><th>Docs</th><th>Actions</th></tr></thead>
+            <tbody id="models-tbody"><tr><td colspan="6"><div class="loader"></div></td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- CLAUSES -->
+      <section id="a-clauses" class="admin-section">
+        <div class="sec-header">
+          <div><h2 class="sec-title">Clause Editor</h2><p class="sec-sub">Edit legal documents shown to models</p></div>
+          <button onclick="saveClauses()" class="btn btn-gold">Publish All Changes</button>
+        </div>
+        <div class="tabs mb-4">
+          <button class="tab active" onclick="clauseTab(this,'cl-agreement')">Agreement</button>
+          <button class="tab" onclick="clauseTab(this,'cl-consent')">Consent Form</button>
+          <button class="tab" onclick="clauseTab(this,'cl-nda')">NDA</button>
+          <button class="tab" onclick="clauseTab(this,'cl-contract')">Contract</button>
+        </div>
+        <div id="cl-agreement" class="tab-content active"><div class="card"><label class="input-label mb-2">Model Agreement Text</label><textarea id="edit-agreement" style="min-height:420px;font-family:'DM Mono',monospace;font-size:.8rem;line-height:1.7"></textarea></div></div>
+        <div id="cl-consent" class="tab-content"><div class="card"><label class="input-label mb-2">Consent Form Text</label><textarea id="edit-consent" style="min-height:420px;font-family:'DM Mono',monospace;font-size:.8rem;line-height:1.7"></textarea></div></div>
+        <div id="cl-nda" class="tab-content"><div class="card"><label class="input-label mb-2">NDA Text</label><textarea id="edit-nda" style="min-height:420px;font-family:'DM Mono',monospace;font-size:.8rem;line-height:1.7"></textarea></div></div>
+        <div id="cl-contract" class="tab-content"><div class="card"><label class="input-label mb-2">Contract Text</label><textarea id="edit-contract" style="min-height:420px;font-family:'DM Mono',monospace;font-size:.8rem;line-height:1.7"></textarea></div></div>
+      </section>
+
+      <!-- SERVICES -->
+      <section id="a-services" class="admin-section">
+        <div class="sec-header">
+          <div><h2 class="sec-title">Services Manager</h2><p class="sec-sub">Add or remove available services</p></div>
+          <button onclick="openSvcModal()" class="btn btn-gold">+ Add Service</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Service</th><th>Category</th><th>Description</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="svcs-tbody"><tr><td colspan="5"><div class="loader"></div></td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- NOTIFICATIONS -->
+      <section id="a-notifs" class="admin-section">
+        <div class="sec-header"><div><h2 class="sec-title">Send Notification</h2><p class="sec-sub">Message models directly</p></div></div>
+        <div class="card-gold p-4 mb-4">
+          <div class="input-group"><label class="input-label">Recipient</label><select id="notif-to"><option value="all">All Models</option></select></div>
+          <div class="input-group"><label class="input-label">Message</label><textarea id="notif-msg" placeholder="Type your message..."></textarea></div>
+          <button onclick="sendNotif()" class="btn btn-gold">Send Notification</button>
+        </div>
+        <div class="card"><p class="label mb-3">Sent History</p><div id="a-notifs-list"><div class="loader"></div></div></div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- MODEL DETAIL MODAL -->
+<div id="model-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="flex justify-between items-center mb-3">
+      <h2 style="font-size:1.5rem" id="mm-title">Model Details</h2>
+      <button onclick="closeModal('model-modal')" class="btn btn-ghost btn-sm">✕</button>
+    </div>
+    <div id="mm-body"><div class="loader"></div></div>
+  </div>
+</div>
+
+<!-- SERVICE MODAL -->
+<div id="svc-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="flex justify-between items-center mb-3">
+      <h2 style="font-size:1.5rem" id="svc-modal-title">Add Service</h2>
+      <button onclick="closeModal('svc-modal')" class="btn btn-ghost btn-sm">✕</button>
+    </div>
+    <input type="hidden" id="svc-id">
+    <div class="input-group"><label class="input-label">Service Name *</label><input type="text" id="svc-name" placeholder="e.g. Photo Shoots"></div>
+    <div class="input-group"><label class="input-label">Category</label><input type="text" id="svc-cat" placeholder="e.g. Photography, Video, Events"></div>
+    <div class="input-group"><label class="input-label">Description</label><textarea id="svc-desc" placeholder="Brief description..." style="min-height:80px"></textarea></div>
+    <div class="input-group"><label class="input-label">Visibility</label><select id="svc-active"><option value="true">Active — visible to models</option><option value="false">Inactive — hidden</option></select></div>
+    <button onclick="saveService()" class="btn btn-gold btn-full">Save Service</button>
+  </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- FIREBASE & APP LOGIC (Full script)                         -->
+<!-- ========================================================== -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs, query, orderBy, where, deleteDoc, serverTimestamp, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+// ── CONFIG ──────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyAfL3EzXYjkvw7S6xDABl9N94-l9S0TxLQ",
+  authDomain: "ei8-in-studios.firebaseapp.com",
+  projectId: "ei8-in-studios",
+  storageBucket: "ei8-in-studios.firebasestorage.app",
+  messagingSenderId: "963125409399",
+  appId: "1:963125409399:web:fdf1423f365b1ef9607872"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+const gProvider = new GoogleAuthProvider();
+
+// ── STATE ────────────────────────────────────────────────────────────
+let currentUser = null, modelData = null, clauses = {}, allSvcs = [], allModels = [], selectedSvcs = new Set(), editSvcId = null, currentFilter = 'all';
+let sigPads = {};
+const ADMIN_EMAILS = ['admin@ei8instudios.com', 'studio@ei8in.com'];
+
+// ── GLOBAL EXPOSURE ───────────────────────────────────────────────────
+window.showView = (id) => { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); const el = document.getElementById(id); if(el) el.classList.add('active'); window.scrollTo(0,0); };
+window.toast = (msg, type='info') => { const c = document.getElementById('toast-wrap'); const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg; c.appendChild(t); setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3500); };
+window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function v(id) { return document.getElementById(id)?.value || ''; }
+function fmtDate(ts) { if(!ts) return '—'; try { const d = ts.toDate ? ts.toDate() : new Date(ts); return d.toLocaleDateString(); } catch(e) { return '—'; } }
+function badge(status) { const map={pending:['badge-muted','Pending'],agreement_signed:['badge-blue','Agreement Signed'],consent_signed:['badge-blue','Consent Signed'],nda_signed:['badge-blue','NDA Signed'],services_selected:['badge-gold','Awaiting Contract'],contract_ready:['badge-purple','Contract Ready'],contracted:['badge-green','Contracted'],active:['badge-green','Active']}; const [c,l]=map[status]||['badge-muted',status||'—']; return `<span class="badge ${c}">${l}</span>`; }
+function setText(id,val){ const el=document.getElementById(id); if(el) el.textContent=val; }
+function updateStepper(n){ document.querySelectorAll('#stepper .step').forEach((el,i)=>{ el.classList.remove('active','done'); if(i+1<n) el.classList.add('done'); if(i+1===n) el.classList.add('active'); }); }
+window.showStep = (n) => { for(let i=1;i<=6;i++) document.getElementById(`step-${i}`)?.classList.add('hidden'); document.getElementById(`step-${n}`)?.classList.remove('hidden'); updateStepper(n); window.scrollTo(0,0); };
+function initSig(id){ const c=document.getElementById(id); if(!c||sigPads[id]) return; const rect=c.getBoundingClientRect(); c.width=rect.width*devicePixelRatio; c.height=rect.height*devicePixelRatio; c.getContext('2d').scale(devicePixelRatio,devicePixelRatio); sigPads[id]=new SignaturePad(c,{penColor:'#C9A84C',backgroundColor:'#fff'}); }
+window.clearSig = (id) => { if(sigPads[id]) sigPads[id].clear(); };
+
+async function uploadSig(id, type) {
+  if (!sigPads[id] || sigPads[id].isEmpty()) return null;
+  const data = sigPads[id].toDataURL();
+  // New path: signatures/{type}/{uid}/{timestamp}.png
+  const storagePath = `signatures/${type}/${currentUser.uid}/${Date.now()}.png`;
+  const sRef = ref(storage, storagePath);
+  await uploadString(sRef, data, 'data_url');
+  return await getDownloadURL(sRef);
+}
+
+async function fetchClauses(){ try{ const snap=await getDoc(doc(db,'clauses','current')); if(snap.exists()) clauses=snap.data(); else clauses={agreement:'Default agreement',consent:'Default consent',nda:'Default NDA',contract:'Default contract'}; setText('s2-txt',clauses.agreement); setText('s3-txt',clauses.consent); setText('s4-txt',clauses.nda); if(document.getElementById('s6-txt')) document.getElementById('s6-txt').textContent=clauses.contract; }catch(e){console.error(e)} }
+window.switchAuthTab = (btn,id) => { document.querySelectorAll('#view-model-auth .tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('#view-model-auth .tab-content').forEach(t=>t.classList.remove('active')); btn.classList.add('active'); document.getElementById(id).classList.add('active'); };
+window.loginModel = async () => { const e=v('loginEmail'),p=v('loginPassword'); if(!e||!p) return toast('Enter credentials','error'); try{ await signInWithEmailAndPassword(auth,e,p); toast('Welcome back!','success'); }catch(e){ toast('Login failed: '+e.message,'error'); } };
+window.loginWithGoogle = async () => { try{ const r=await signInWithPopup(auth,gProvider); const snap=await getDoc(doc(db,'models',r.user.uid)); if(!snap.exists()) await setDoc(doc(db,'models',r.user.uid),{uid:r.user.uid,email:r.user.email,displayName:r.user.displayName||'',status:'pending',createdAt:serverTimestamp()}); toast('Google sign-in success','success'); }catch(e){ toast('Google error: '+e.message,'error'); } };
+window.registerModel = async () => { const fn=v('regFirst'),ln=v('regLast'),em=v('regEmail'),pw=v('regPass'),pwc=v('regPassC'); if(!fn||!ln||!em||!pw) return toast('Fill all fields','error'); if(pw!==pwc) return toast('Passwords mismatch','error'); if(pw.length<8) return toast('Password min 8 chars','error'); if(!document.getElementById('regAge18').checked) return toast('Must be 18+','error'); if(!document.getElementById('regTerms').checked) return toast('Accept terms','error'); try{ const cred=await createUserWithEmailAndPassword(auth,em,pw); await updateProfile(cred.user,{displayName:`${fn} ${ln}`}); await setDoc(doc(db,'models',cred.user.uid),{uid:cred.user.uid,email:em,displayName:`${fn} ${ln}`,status:'pending',createdAt:serverTimestamp()}); toast('Account created!','success'); }catch(e){ toast('Registration failed: '+e.message,'error'); } };
+window.logoutModel = async () => { await signOut(auth); modelData=null; toast('Signed out','info'); };
+window.logoutAdmin = async () => { await signOut(auth); toast('Admin signed out','info'); };
+window.loginAdmin = async () => { const e=v('adminEmail'),p=v('adminPass'); if(!e||!p) return toast('Enter credentials','error'); try{ await signInWithEmailAndPassword(auth,e,p); toast('Admin access','success'); }catch(e){ toast('Admin auth failed','error'); } };
+async function loadModelDoc(uid){ const snap=await getDoc(doc(db,'models',uid)); if(snap.exists()) modelData={id:snap.id,...snap.data()}; else modelData=null; }
+function routeModel(){ if(!modelData){ showView('view-onboarding'); fetchClauses(); showStep(1); const obNameSpan=document.getElementById('ob-name'); if(obNameSpan) obNameSpan.textContent=currentUser.displayName||currentUser.email; return; } const s=modelData.status; const name=modelData.stageName||currentUser.displayName||currentUser.email; const obSpan=document.getElementById('ob-name'); if(obSpan) obSpan.textContent=name; const dashSpan=document.getElementById('dash-name'); if(dashSpan) dashSpan.textContent=name; if(s==='contracted'||s==='active'){ showView('view-model-dashboard'); loadDashboard(); } else if(s==='contract_ready'){ showView('view-onboarding'); fetchClauses().then(()=>{ showStep(6); document.getElementById('s6-await').classList.add('hidden'); document.getElementById('s6-contract').classList.remove('hidden'); setTimeout(()=>initSig('sig-contract'),300); if(document.getElementById('s6-txt')) document.getElementById('s6-txt').textContent=clauses.contract; }); } else if(s==='services_selected'){ showView('view-onboarding'); fetchClauses().then(()=>{ showStep(6); document.getElementById('s6-await').classList.remove('hidden'); document.getElementById('s6-contract').classList.add('hidden'); }); } else { showView('view-onboarding'); fetchClauses().then(()=>{ const stepMap={pending:1,agreement_signed:2,consent_signed:3,nda_signed:4}; showStep(stepMap[s]||1); if(s==='consent_signed') setTimeout(()=>initSig('sig-consent'),300); if(s==='nda_signed') setTimeout(()=>initSig('sig-nda'),300); }); } }
+window.submitStep1 = async () => { if(!v('s1-legal')||!v('s1-stage')||!v('s1-dob')||!v('s1-id')) return toast('Fill required fields','error'); const age=new Date().getFullYear()-new Date(v('s1-dob')).getFullYear(); if(age<18) return toast('Must be 18+','error'); await setDoc(doc(db,'models',currentUser.uid),{legalName:v('s1-legal'),stageName:v('s1-stage'),dob:v('s1-dob'),phone:v('s1-phone'),idInfo:v('s1-id'),nationality:v('s1-nat'),address:v('s1-addr'),emergency:v('s1-emer'),status:'pending'},{merge:true}); modelData={...modelData,stageName:v('s1-stage')}; const obSpan=document.getElementById('ob-name'); if(obSpan) obSpan.textContent=v('s1-stage'); showStep(2); toast('Profile saved','success'); };
+window.submitStep2 = async () => { if(!document.getElementById('s2-agree').checked) return toast('Accept agreement','error'); await updateDoc(doc(db,'models',currentUser.uid),{status:'agreement_signed',agreementSignedAt:serverTimestamp()}); modelData.status='agreement_signed'; showStep(3); setTimeout(()=>initSig('sig-consent'),300); toast('Agreement accepted','success'); };
+window.submitStep3 = async () => { if(!document.getElementById('s3-agree').checked) return toast('Check consent box','error'); if(!sigPads['sig-consent']||sigPads['sig-consent'].isEmpty()) return toast('Provide signature','error'); const url=await uploadSig('sig-consent','consent'); await updateDoc(doc(db,'models',currentUser.uid),{status:'consent_signed',consentSignedAt:serverTimestamp(),consentSignatureUrl:url}); modelData.status='consent_signed'; showStep(4); setTimeout(()=>initSig('sig-nda'),300); toast('Consent signed','success'); };
+window.submitStep4 = async () => { if(!document.getElementById('s4-agree').checked) return toast('Accept NDA','error'); if(!sigPads['sig-nda']||sigPads['sig-nda'].isEmpty()) return toast('Signature required','error'); const url=await uploadSig('sig-nda','nda'); await updateDoc(doc(db,'models',currentUser.uid),{status:'nda_signed',ndaSignedAt:serverTimestamp(),ndaSignatureUrl:url}); modelData.status='nda_signed'; await loadSvcsOnboarding(); showStep(5); toast('NDA signed','success'); };
+async function loadSvcsOnboarding(){ const snap=await getDocs(query(collection(db,'services'),where('active','==',true))); allSvcs=[]; snap.forEach(d=>allSvcs.push({id:d.id,...d.data()})); selectedSvcs=new Set(modelData?.selectedServices||[]); const g=document.getElementById('s5-grid'); if(!g) return; g.innerHTML=allSvcs.map(s=>`<div class="service-card ${selectedSvcs.has(s.id)?'selected':''}" onclick="toggleSvc('${s.id}')"><div class="chk">✓</div><p class="label mb-1">${s.category||'General'}</p><p style="font-weight:600">${s.name}</p><p class="text-xs text-muted mt-1">${s.description||''}</p></div>`).join(''); }
+window.toggleSvc = (id) => { if(selectedSvcs.has(id)) selectedSvcs.delete(id); else selectedSvcs.add(id); const card=document.querySelector(`[onclick="toggleSvc('${id}')"]`); if(card) card.classList.toggle('selected',selectedSvcs.has(id)); };
+window.submitStep5 = async () => { if(selectedSvcs.size===0) return toast('Select at least one service','error'); await updateDoc(doc(db,'models',currentUser.uid),{status:'services_selected',selectedServices:Array.from(selectedSvcs),servicesSelectedAt:serverTimestamp()}); modelData.status='services_selected'; modelData.selectedServices=Array.from(selectedSvcs); const names=allSvcs.filter(s=>selectedSvcs.has(s.id)).map(s=>s.name); document.getElementById('s6-summary').innerHTML=`<div>Stage Name: ${modelData.stageName}<br>Legal: ${modelData.legalName}<br>Services: ${names.join(', ')}<br>Status: ${badge('services_selected')}</div>`; await addDoc(collection(db,'admin_notifications'),{type:'new_application',modelId:currentUser.uid,modelName:modelData.stageName,message:`New application from ${modelData.stageName}`,createdAt:serverTimestamp()}); showStep(6); document.getElementById('s6-await').classList.remove('hidden'); document.getElementById('s6-contract').classList.add('hidden'); toast('Application submitted!','success'); };
+window.submitContract = async () => { if(!document.getElementById('s6-agree').checked) return toast('Accept contract','error'); if(!sigPads['sig-contract']||sigPads['sig-contract'].isEmpty()) return toast('Signature required','error'); const url=await uploadSig('sig-contract','contract'); await updateDoc(doc(db,'models',currentUser.uid),{status:'contracted',contractSignedAt:serverTimestamp(),contractSignatureUrl:url}); await addDoc(collection(db,'notifications'),{userId:currentUser.uid,message:'🎉 Contract signed! Welcome to Ei8-In Studios!',read:false,createdAt:serverTimestamp()}); modelData.status='contracted'; toast('Contract signed! Welcome!','success'); showView('view-model-dashboard'); loadDashboard(); };
+window.goContractStep = () => { showView('view-onboarding'); fetchClauses().then(()=>{ showStep(6); document.getElementById('s6-await').classList.add('hidden'); document.getElementById('s6-contract').classList.remove('hidden'); setTimeout(()=>initSig('sig-contract'),300); if(document.getElementById('s6-txt')) document.getElementById('s6-txt').textContent=clauses.contract; }); };
+async function loadDashboard(){ if(!modelData) return; document.getElementById('d-stat-status').innerHTML=badge(modelData.status); let docs=0; if(modelData.agreementSignedAt) docs++; if(modelData.consentSignedAt) docs++; if(modelData.ndaSignedAt) docs++; if(modelData.contractSignedAt) docs++; document.getElementById('d-stat-docs').textContent=docs; document.getElementById('d-stat-svcs').textContent=modelData.selectedServices?.length||0; document.getElementById('d-stat-joined').textContent=fmtDate(modelData.createdAt); if(modelData.status==='contract_ready') document.getElementById('d-contract-prompt')?.classList.remove('hidden'); const order=['pending','agreement_signed','consent_signed','nda_signed','services_selected','contract_ready','contracted']; const idx=order.indexOf(modelData.status); const labels={pending:'Profile',agreement_signed:'Agreement',consent_signed:'Consent',nda_signed:'NDA',services_selected:'Services',contract_ready:'Contract',contracted:'Active'}; document.getElementById('d-timeline').innerHTML=order.map((s,i)=>`<div class="tl-item ${i<=idx?'done':''} ${i===idx?'current':''}"><div class="tl-title">${labels[s]||s}</div><div class="tl-sub">${i<=idx?'✓ completed':''}</div></div>`).join(''); const docsList=[{label:'Agreement',signed:modelData.agreementSignedAt},{label:'Consent',signed:modelData.consentSignedAt,url:modelData.consentSignatureUrl},{label:'NDA',signed:modelData.ndaSignedAt,url:modelData.ndaSignatureUrl},{label:'Contract',signed:modelData.contractSignedAt,url:modelData.contractSignatureUrl}]; document.getElementById('docs-list').innerHTML=docsList.map(d=>`<div class="card flex justify-between"><div><strong>${d.label}</strong><br><span class="text-xs">${d.signed?'Signed '+fmtDate(d.signed):'Pending'}</span></div>${d.url?`<a href="${d.url}" target="_blank" class="btn btn-ghost btn-sm">View</a>`:''}</div>`).join(''); if(modelData.selectedServices){ const snap=await getDocs(collection(db,'services')); const svcMap={}; snap.forEach(s=>svcMap[s.id]=s.data()); document.getElementById('svcs-list').innerHTML=modelData.selectedServices.map(sid=>svcMap[sid]?`<div class="card"><p class="label">${svcMap[sid].category}</p><strong>${svcMap[sid].name}</strong></div>`:'').join('')||'<p class="text-muted">No services</p>'; } document.getElementById('d-profile-content').innerHTML=`<div class="grid-2"><div>Legal: ${modelData.legalName||'—'}</div><div>Stage: ${modelData.stageName||'—'}</div><div>Email: ${modelData.email}</div><div>DOB: ${modelData.dob||'—'}</div><div>ID: ${modelData.idInfo||'—'}</div><div>Nationality: ${modelData.nationality||'—'}</div></div><div class="divider"></div><div>Address: ${modelData.address||'—'}</div><div>Emergency: ${modelData.emergency||'—'}</div>`; await loadModelNotifs(true); }
+async function loadModelNotifs(preview=false){ const snap=await getDocs(query(collection(db,'notifications'),where('userId','==',currentUser.uid),orderBy('createdAt','desc'))); let html='',prev='',unread=0; snap.forEach(d=>{ const n=d.data(); if(!n.read) unread++; html+=`<div class="notif ${!n.read?'unread':''}"><div>${n.message}</div><div class="notif-time">${fmtDate(n.createdAt)}</div></div>`; if(preview && html.length<300) prev=html; }); document.getElementById('notifs-list').innerHTML=html||'<p class="text-muted">No notifications</p>'; if(preview) document.getElementById('d-recent-notifs').innerHTML=prev||'<p class="text-muted">No recent</p>'; if(unread>0){ const b=document.getElementById('notif-badge'); if(b){ b.textContent=unread; b.classList.remove('hidden'); } } snap.forEach(async d=>{ if(!d.data().read) await updateDoc(doc(db,'notifications',d.id),{read:true}); }); }
+window.dashTab = (btn,id) => { document.querySelectorAll('#view-model-dashboard .tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('#view-model-dashboard .tab-content').forEach(t=>t.classList.remove('active')); btn.classList.add('active'); document.getElementById(id).classList.add('active'); if(id==='d-notifs') loadModelNotifs(); };
+window.clauseTab = (btn,id) => { document.querySelectorAll('#a-clauses .tab').forEach(t=>t.classList.remove('active')); document.querySelectorAll('#a-clauses .tab-content').forEach(t=>t.classList.remove('active')); btn.classList.add('active'); document.getElementById(id).classList.add('active'); };
+window.saveClauses = async () => { await setDoc(doc(db,'clauses','current'),{agreement:document.getElementById('edit-agreement').value,consent:document.getElementById('edit-consent').value,nda:document.getElementById('edit-nda').value,contract:document.getElementById('edit-contract').value,updatedAt:serverTimestamp()},{merge:true}); toast('Clauses published','success'); };
+async function loadClausesAdmin(){ const snap=await getDoc(doc(db,'clauses','current')); if(snap.exists()){ const d=snap.data(); document.getElementById('edit-agreement').value=d.agreement||''; document.getElementById('edit-consent').value=d.consent||''; document.getElementById('edit-nda').value=d.nda||''; document.getElementById('edit-contract').value=d.contract||''; } }
+window.loadAdminData = async () => { await loadClausesAdmin(); await loadAllModels(); await loadAdminSvcs(); await loadAdminStats(); await loadRecentSubs(); await loadAdminNotifs(); await fillNotifSelect(); };
+async function loadAllModels(){ const snap=await getDocs(query(collection(db,'models'),orderBy('createdAt','desc'))); allModels=[]; snap.forEach(d=>allModels.push({id:d.id,...d.data()})); renderModels(allModels); }
+function renderModels(models){ const tb=document.getElementById('models-tbody'); if(!models.length){ tb.innerHTML='<tr><td colspan="6" class="text-center">No models</td></tr>'; return; } tb.innerHTML=models.map(m=>{ let docs=0; if(m.agreementSignedAt) docs++; if(m.consentSignedAt) docs++; if(m.ndaSignedAt) docs++; if(m.contractSignedAt) docs++; const canPromote=m.status==='services_selected'; return `<tr><td><div>${m.legalName||m.displayName||'—'}</div><div class="text-xs text-muted">${m.email}</div></td><td>${badge(m.status)}</td><td>${m.stageName||'—'}</td><td>${fmtDate(m.createdAt)}</td><td>${docs}</td><td><div class="flex gap-1"><button class="btn btn-ghost btn-sm" onclick="openModelDetail('${m.id}')">View</button>${canPromote?`<button class="btn btn-gold btn-sm" onclick="promoteModel('${m.id}')">Promote to Contract</button>`:''}<button class="btn btn-danger btn-sm" onclick="deleteModel('${m.id}')">Delete</button></div></td></tr>`; }).join(''); }
+window.filterModels = (btn,filter) => { currentFilter=filter; document.querySelectorAll('#a-models .tab').forEach(t=>t.classList.remove('active')); btn.classList.add('active'); if(filter==='all') renderModels(allModels); else renderModels(allModels.filter(m=>m.status===filter)); };
+window.openModelDetail = async (id) => { const m=allModels.find(x=>x.id===id); if(!m) return; document.getElementById('mm-title').innerHTML=`${m.stageName||m.legalName||'Model'}`; document.getElementById('mm-body').innerHTML=`<div class="space-y"><div><strong>Legal:</strong> ${m.legalName||'—'}</div><div><strong>Stage:</strong> ${m.stageName||'—'}</div><div><strong>Email:</strong> ${m.email}</div><div><strong>Status:</strong> ${badge(m.status)}</div><div><strong>Services:</strong> ${m.selectedServices?.length||0}</div><div><strong>Signed Docs:</strong> ${m.agreementSignedAt?'Agreement ✅ ':''}${m.consentSignedAt?'Consent ✅ ':''}${m.ndaSignedAt?'NDA ✅ ':''}${m.contractSignedAt?'Contract ✅':''}</div>${m.consentSignatureUrl?`<div><a href="${m.consentSignatureUrl}" target="_blank">Consent Signature</a></div>`:''}${m.ndaSignatureUrl?`<div><a href="${m.ndaSignatureUrl}" target="_blank">NDA Signature</a></div>`:''}</div>`; openModal('model-modal'); };
+window.promoteModel = async (id) => { await updateDoc(doc(db,'models',id),{status:'contract_ready',contractReadyAt:serverTimestamp()}); await addDoc(collection(db,'notifications'),{userId:id,message:'Your contract is ready! Please log in to sign.',read:false,createdAt:serverTimestamp()}); toast('Model promoted to contract_ready','success'); loadAllModels(); };
+window.deleteModel = async (id) => { if(confirm('Permanently delete model?')){ await deleteDoc(doc(db,'models',id)); toast('Model deleted','info'); loadAllModels(); } };
+async function loadAdminSvcs(){ const snap=await getDocs(collection(db,'services')); const svcs=[]; snap.forEach(d=>svcs.push({id:d.id,...d.data()})); const tbody=document.getElementById('svcs-tbody'); tbody.innerHTML=svcs.map(s=>`<tr><td><strong>${s.name}</strong></td><td>${s.category||'—'}</td><td>${s.description||''}</td><td>${s.active?'Active':'Inactive'}</td><td><button class="btn btn-ghost btn-sm" onclick="editService('${s.id}','${s.name.replace(/'/g,"\\'")}','${s.category||''}','${(s.description||'').replace(/'/g,"\\'")}','${s.active}')">Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteService('${s.id}')">Del</button></td></tr>`).join(''); }
+window.openSvcModal = () => { editSvcId=null; document.getElementById('svc-name').value=''; document.getElementById('svc-cat').value=''; document.getElementById('svc-desc').value=''; document.getElementById('svc-active').value='true'; document.getElementById('svc-modal-title').innerText='Add Service'; openModal('svc-modal'); };
+window.editService = (id,name,category,desc,active) => { editSvcId=id; document.getElementById('svc-name').value=name; document.getElementById('svc-cat').value=category; document.getElementById('svc-desc').value=desc; document.getElementById('svc-active').value=active.toString(); document.getElementById('svc-modal-title').innerText='Edit Service'; openModal('svc-modal'); };
+window.saveService = async () => { const name=v('svc-name'),cat=v('svc-cat'),desc=v('svc-desc'),active=v('svc-active')==='true'; if(!name) return toast('Service name required','error'); if(editSvcId){ await setDoc(doc(db,'services',editSvcId),{name,category:cat,description:desc,active},{merge:true}); } else { await addDoc(collection(db,'services'),{name,category:cat,description:desc,active,createdAt:serverTimestamp()}); } closeModal('svc-modal'); await loadAdminSvcs(); toast('Service saved','success'); };
+window.deleteService = async (id) => { if(confirm('Delete service?')){ await deleteDoc(doc(db,'services',id)); loadAdminSvcs(); toast('Service deleted','info'); } };
+async function loadAdminStats(){ const modelsSnap=await getDocs(collection(db,'models')); const total=modelsSnap.size; let pending=0,contracted=0; modelsSnap.forEach(d=>{ if(d.data().status==='pending') pending++; if(d.data().status==='contracted'||d.data().status==='active') contracted++; }); const svcSnap=await getDocs(collection(db,'services')); document.getElementById('a-total').innerText=total; document.getElementById('a-pending').innerText=pending; document.getElementById('a-contracted').innerText=contracted; document.getElementById('a-svcs').innerText=svcSnap.size; }
+async function loadRecentSubs(){ const snap=await getDocs(query(collection(db,'models'),orderBy('createdAt','desc'),limit(5))); let html='<div class="space-y">'; snap.forEach(d=>{ const m=d.data(); html+=`<div class="flex justify-between"><span>${m.stageName||m.legalName||m.email}</span><span class="badge badge-muted">${m.status}</span></div>`; }); html+='</div>'; document.getElementById('a-recent').innerHTML=html||'<p class="text-muted">None</p>'; }
+async function fillNotifSelect(){ const models=await getDocs(collection(db,'models')); const select=document.getElementById('notif-to'); select.innerHTML='<option value="all">All Models</option>'+models.docs.map(d=>`<option value="${d.id}">${d.data().stageName||d.data().legalName||d.data().email}</option>`).join(''); }
+async function loadAdminNotifs(){ const snap=await getDocs(query(collection(db,'admin_notifications'),orderBy('createdAt','desc'))); const list=document.getElementById('a-notifs-list'); if(list) list.innerHTML=snap.docs.map(d=>`<div class="notif"><div>${d.data().message}</div><div class="notif-time">${fmtDate(d.data().createdAt)}</div></div>`).join('')||'<p class="text-muted">No notifications sent</p>'; }
+window.sendNotif = async () => { const to=v('notif-to'),msg=v('notif-msg'); if(!msg) return toast('Message empty','error'); const allModels=await getDocs(collection(db,'models')); if(to==='all'){ for(const docSnap of allModels.docs){ await addDoc(collection(db,'notifications'),{userId:docSnap.id,message:msg,read:false,createdAt:serverTimestamp()}); } } else { await addDoc(collection(db,'notifications'),{userId:to,message:msg,read:false,createdAt:serverTimestamp()}); } await addDoc(collection(db,'admin_notifications'),{recipient:to,message:msg,createdAt:serverTimestamp()}); toast('Notification sent','success'); loadAdminNotifs(); };
+window.adminNav = (btn,id) => { document.querySelectorAll('.sb-link').forEach(l=>l.classList.remove('active')); document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active')); btn.classList.add('active'); document.getElementById(id).classList.add('active'); };
+function initAuth(){ onAuthStateChanged(auth,async user=>{ if(user){ currentUser=user; if(ADMIN_EMAILS.includes(user.email)){ document.getElementById('admin-name').textContent=user.email; showView('view-admin-dashboard'); loadAdminData(); } else { await loadModelDoc(user.uid); routeModel(); } } else { currentUser=null; if(localStorage.getItem('e8_age')==='1') showView('view-landing'); } }); }
+window.enterSite = () => { localStorage.setItem('e8_age','1'); document.getElementById('age-gate').style.display='none'; initAuth(); };
+if(localStorage.getItem('e8_age')==='1') document.getElementById('age-gate').style.display='none';
+window.addEventListener('load',()=>{ if(!localStorage.getItem('e8_age')) document.getElementById('age-gate').style.display='flex'; else initAuth(); });
+</script>
+</body>
+</html>
+
