@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ei8-In Studios — Pleasure & Wealth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garant:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<!-- Signature Pad library (global, must load before main.js) -->
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+<!-- App Styles -->
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ================================================================== -->
+<!-- AGE GATE                                                            -->
+<!-- ================================================================== -->
+<div id="age-gate">
+  <div style="position:relative;z-index:1">
+    <div class="brand-logo" style="width:52px;height:52px;font-size:1.4rem;margin:0 auto 1rem">E8</div>
+    <h1 style="font-family:'Cormorant Garant',serif;font-size:2rem">Ei8-In Studios</h1>
+    <p class="label mt-1">Pleasure &amp; Wealth</p>
+  </div>
+  <div class="card" style="max-width:420px;text-align:left;position:relative;z-index:1">
+    <p class="label mb-2">⚠ Age Verification Required</p>
+    <p class="text-sm text-muted" style="line-height:1.75">This portal is strictly for individuals <strong style="color:var(--text)">18 years of age or older</strong>. It contains adult-oriented content and legally binding agreements related to the adult entertainment industry.</p>
+    <p class="text-sm text-muted mt-2" style="line-height:1.75">By entering, you confirm you are a legal adult in your jurisdiction and voluntarily consent to engage with this content.</p>
+    <div class="divider"></div>
+    <div class="flex gap-1">
+      <button onclick="enterSite()" class="btn btn-gold btn-full">I Am 18+ &mdash; Enter</button>
+      <button onclick="window.location.href='https://google.com'" class="btn btn-ghost btn-full">Exit</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-wrap"></div>
+
+<!-- ================================================================== -->
+<!-- LANDING                                                             -->
+<!-- ================================================================== -->
+<div id="view-landing" class="view">
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="brand">
+        <div class="brand-logo">E8</div>
+        <div><span class="brand-name">Ei8-In Studios</span><span class="brand-tag">Pleasure &amp; Wealth</span></div>
+      </div>
+    </div>
+  </nav>
+  <div class="hero">
+    <div style="max-width:620px">
+      <p class="label mb-2">Welcome to</p>
+      <h1 class="display" style="margin-bottom:.6rem">Ei8-In <em>Studios</em></h1>
+      <div class="hero-sep"></div>
+      <p class="text-muted mt-3 mb-4" style="font-size:1rem;line-height:1.9;max-width:480px;margin-left:auto;margin-right:auto">The premier model management platform. Streamlined onboarding, legal compliance, and talent administration &mdash; refined for the modern industry.</p>
+      <div class="flex gap-2 justify-center" style="flex-wrap:wrap">
+        <button onclick="showView('view-model-auth')" class="btn btn-gold btn-lg">↗ Model Portal</button>
+        <button onclick="showView('view-admin-auth')" class="btn btn-ghost btn-lg">Admin Access →</button>
+      </div>
+      <p class="text-xs text-muted mt-4">Strictly 18+ &bull; Adult Content Industry &bull; All Data Encrypted &bull; Confidential</p>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- MODEL AUTH                                                          -->
+<!-- ================================================================== -->
+<div id="view-model-auth" class="view">
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="brand"><div class="brand-logo">E8</div><div><span class="brand-name">Ei8-In Studios</span><span class="brand-tag">Model Portal</span></div></div>
+      <button onclick="showView('view-landing')" class="btn btn-ghost btn-sm">← Back</button>
+    </div>
+  </nav>
+  <div class="container-sm" style="padding-top:3rem;padding-bottom:3rem">
+    <div class="card-gold p-4">
+      <div class="tabs mb-4">
+        <button class="tab active" onclick="switchAuthTab(this,'auth-login')">Sign In</button>
+        <button class="tab" onclick="switchAuthTab(this,'auth-register')">Create Account</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="auth-login" class="tab-content active">
+        <p class="label mb-3">Model Login</p>
+        <div class="input-group"><label class="input-label">Email</label><input type="email" id="loginEmail" placeholder="your@email.com"></div>
+        <div class="input-group"><label class="input-label">Password</label><input type="password" id="loginPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')loginModel()"></div>
+        <button onclick="loginModel()" class="btn btn-gold btn-full mb-2">Sign In to Portal</button>
+        <div class="divider"></div>
+        <button onclick="loginWithGoogle()" class="btn btn-ghost btn-full" style="border-color:var(--border-b)">
+          <svg width="15" height="15" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.27 9.77A7.3 7.3 0 0 1 12 4.7c1.9 0 3.6.67 4.94 1.77L20.22 3.2A11.95 11.95 0 0 0 12 0C7.32 0 3.26 2.7 1.28 6.63l3.99 3.14Z"/><path fill="#FBBC05" d="M16.04 18.01A7.28 7.28 0 0 1 12 19.3c-2.96 0-5.51-1.77-6.73-4.33l-3.99 3.09A12 12 0 0 0 12 24c3.24 0 6.19-1.16 8.45-3.08l-4.41-2.91Z"/><path fill="#4285F4" d="M20.45 13.73c.12-.55.18-1.15.18-1.73 0-.55-.06-1.1-.17-1.61H12v3.62h4.78a4.07 4.07 0 0 1-1.74 2.7l4.41 2.9c2.57-2.37 4-5.89 4-9.61"/><path fill="#34A853" d="M5.27 14.23A7.4 7.4 0 0 1 4.7 12c0-.77.12-1.52.35-2.23L1.06 6.63A12 12 0 0 0 0 12c0 1.93.46 3.75 1.28 5.37l3.99-3.14Z"/></svg>
+          Continue with Google
+        </button>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="auth-register" class="tab-content">
+        <p class="label mb-3">New Model Registration</p>
+        <div class="grid-2">
+          <div class="input-group"><label class="input-label">First Name</label><input type="text" id="regFirst" placeholder="First"></div>
+          <div class="input-group"><label class="input-label">Last Name</label><input type="text" id="regLast" placeholder="Last"></div>
+        </div>
+        <div class="input-group"><label class="input-label">Email</label><input type="email" id="regEmail" placeholder="your@email.com"></div>
+        <div class="input-group"><label class="input-label">Password</label><input type="password" id="regPass" placeholder="Min. 8 characters"></div>
+        <div class="input-group"><label class="input-label">Confirm Password</label><input type="password" id="regPassC" placeholder="Repeat password"></div>
+        <label class="checkbox-label mb-3"><input type="checkbox" id="regAge18"><span>I confirm I am at least 18 years of age</span></label>
+        <label class="checkbox-label mb-3"><input type="checkbox" id="regTerms"><span>I agree to the Terms of Service and Privacy Policy</span></label>
+        <button onclick="registerModel()" class="btn btn-gold btn-full mb-2">Create Account</button>
+        <div class="divider"></div>
+        <button onclick="loginWithGoogle()" class="btn btn-ghost btn-full" style="border-color:var(--border-b)">
+          <svg width="15" height="15" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.27 9.77A7.3 7.3 0 0 1 12 4.7c1.9 0 3.6.67 4.94 1.77L20.22 3.2A11.95 11.95 0 0 0 12 0C7.32 0 3.26 2.7 1.28 6.63l3.99 3.14Z"/><path fill="#FBBC05" d="M16.04 18.01A7.28 7.28 0 0 1 12 19.3c-2.96 0-5.51-1.77-6.73-4.33l-3.99 3.09A12 12 0 0 0 12 24c3.24 0 6.19-1.16 8.45-3.08l-4.41-2.91Z"/><path fill="#4285F4" d="M20.45 13.73c.12-.55.18-1.15.18-1.73 0-.55-.06-1.1-.17-1.61H12v3.62h4.78a4.07 4.07 0 0 1-1.74 2.7l4.41 2.9c2.57-2.37 4-5.89 4-9.61"/><path fill="#34A853" d="M5.27 14.23A7.4 7.4 0 0 1 4.7 12c0-.77.12-1.52.35-2.23L1.06 6.63A12 12 0 0 0 0 12c0 1.93.46 3.75 1.28 5.37l3.99-3.14Z"/></svg>
+          Sign up with Google
+        </button>
+      </div>
+    </div>
+    <p class="text-xs text-muted text-center mt-3">By accessing this portal you confirm you are 18+ and consent to our terms.</p>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- ONBOARDING                                                          -->
+<!-- ================================================================== -->
+<div id="view-onboarding" class="view">
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="brand"><div class="brand-logo">E8</div><div><span class="brand-name">Ei8-In Studios</span><span class="brand-tag">Model Onboarding</span></div></div>
+      <div class="flex items-center gap-2">
+        <span id="ob-name" class="text-sm text-muted hide-m"></span>
+        <button onclick="logoutModel()" class="btn btn-ghost btn-sm">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+  <div class="container-md" style="padding-top:1.5rem;padding-bottom:3rem">
+
+    <!-- Stepper -->
+    <div class="stepper" id="stepper">
+      <div class="step" data-step="1"><div class="step-icon">1</div><span class="step-label">Profile</span></div>
+      <div class="step" data-step="2"><div class="step-icon">2</div><span class="step-label">Agreement</span></div>
+      <div class="step" data-step="3"><div class="step-icon">3</div><span class="step-label">Consent</span></div>
+      <div class="step" data-step="4"><div class="step-icon">4</div><span class="step-label">NDA</span></div>
+      <div class="step" data-step="5"><div class="step-icon">5</div><span class="step-label">Services</span></div>
+      <div class="step" data-step="6"><div class="step-icon">6</div><span class="step-label">Contract</span></div>
+    </div>
+
+    <!-- STEP 1: Personal Info -->
+    <div id="step-1" class="hidden">
+      <div class="card-gold p-4">
+        <p class="label mb-1">Step 1 of 6</p>
+        <h2 style="font-size:1.8rem" class="mb-1">Personal <em style="font-style:italic;color:var(--gold)">Information</em></h2>
+        <p class="text-sm text-muted mb-4">Your legal details are required for compliance. All data is encrypted and stored securely.</p>
+        <div class="grid-2">
+          <div class="input-group"><label class="input-label">Legal Full Name *</label><input type="text" id="s1-legal" placeholder="As per government ID"></div>
+          <div class="input-group"><label class="input-label">Stage / Professional Name *</label><input type="text" id="s1-stage" placeholder="Working name"></div>
+          <div class="input-group"><label class="input-label">Date of Birth *</label><input type="date" id="s1-dob"></div>
+          <div class="input-group"><label class="input-label">Phone Number</label><input type="tel" id="s1-phone" placeholder="+1 555 000 0000"></div>
+          <div class="input-group"><label class="input-label">Govt. ID Type &amp; Number *</label><input type="text" id="s1-id" placeholder="e.g. Passport #A12345"></div>
+          <div class="input-group"><label class="input-label">Nationality</label><input type="text" id="s1-nat" placeholder="Country"></div>
+        </div>
+        <div class="input-group"><label class="input-label">Residential Address</label><textarea id="s1-addr" placeholder="Full address" style="min-height:72px"></textarea></div>
+        <div class="input-group"><label class="input-label">Emergency Contact</label><input type="text" id="s1-emer" placeholder="Name & phone number"></div>
+        <div class="flex justify-between mt-3"><div></div><button onclick="submitStep1()" class="btn btn-gold">Save &amp; Continue →</button></div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Agreement -->
+    <div id="step-2" class="hidden">
+      <div class="card-gold p-4">
+        <p class="label mb-1">Step 2 of 6</p>
+        <h2 style="font-size:1.8rem" class="mb-1">Model <em style="font-style:italic;color:var(--gold)">Agreement</em></h2>
+        <p class="text-sm text-muted mb-3">Read the full agreement carefully before proceeding.</p>
+        <div class="clause-box mb-3" id="s2-txt">Loading agreement...</div>
+        <label class="checkbox-label mb-4"><input type="checkbox" id="s2-agree"><span>I have read, understood, and agree to be bound by the terms of this Model Agreement.</span></label>
+        <div class="flex justify-between"><button onclick="showStep(1)" class="btn btn-ghost">← Back</button><button onclick="submitStep2()" class="btn btn-gold">Accept &amp; Continue →</button></div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Consent -->
+    <div id="step-3" class="hidden">
+      <div class="card-gold p-4">
+        <p class="label mb-1">Step 3 of 6</p>
+        <h2 style="font-size:1.8rem" class="mb-1">Consent <em style="font-style:italic;color:var(--gold)">Form</em></h2>
+        <p class="text-sm text-muted mb-3">Read the consent form and provide your digital signature below.</p>
+        <div class="clause-box mb-3" id="s3-txt">Loading consent form...</div>
+        <label class="checkbox-label mb-3"><input type="checkbox" id="s3-agree"><span>I freely and voluntarily provide the consent described above.</span></label>
+        <div class="input-group">
+          <label class="input-label">Digital Signature — draw below</label>
+          <div class="sig-wrap"><canvas id="sig-consent"></canvas></div>
+          <button type="button" onclick="clearSig('sig-consent')" class="btn btn-ghost btn-sm mt-1">Clear Signature</button>
+        </div>
+        <div class="flex justify-between mt-2"><button onclick="showStep(2)" class="btn btn-ghost">← Back</button><button onclick="submitStep3()" class="btn btn-gold">Sign &amp; Continue →</button></div>
+      </div>
+    </div>
+
+    <!-- STEP 4: NDA -->
+    <div id="step-4" class="hidden">
+      <div class="card-gold p-4">
+        <p class="label mb-1">Step 4 of 6</p>
+        <h2 style="font-size:1.8rem" class="mb-1">Non-Disclosure <em style="font-style:italic;color:var(--gold)">Agreement</em></h2>
+        <p class="text-sm text-muted mb-3">This NDA protects both parties. Please read carefully.</p>
+        <div class="clause-box mb-3" id="s4-txt">Loading NDA...</div>
+        <label class="checkbox-label mb-3"><input type="checkbox" id="s4-agree"><span>I agree to be bound by this Non-Disclosure Agreement.</span></label>
+        <div class="input-group">
+          <label class="input-label">Digital Signature</label>
+          <div class="sig-wrap"><canvas id="sig-nda"></canvas></div>
+          <button type="button" onclick="clearSig('sig-nda')" class="btn btn-ghost btn-sm mt-1">Clear</button>
+        </div>
+        <div class="flex justify-between mt-2"><button onclick="showStep(3)" class="btn btn-ghost">← Back</button><button onclick="submitStep4()" class="btn btn-gold">Sign &amp; Continue →</button></div>
+      </div>
+    </div>
+
+    <!-- STEP 5: Services -->
+    <div id="step-5" class="hidden">
+      <div class="card-gold p-4">
+        <p class="label mb-1">Step 5 of 6</p>
+        <h2 style="font-size:1.8rem" class="mb-1">Select <em style="font-style:italic;color:var(--gold)">Services</em></h2>
+        <p class="text-sm text-muted mb-4">Choose the services you wish to offer. These can be updated after approval.</p>
+        <div id="s5-grid" class="grid-2 mb-4"><div class="loader"></div></div>
+        <div class="flex justify-between"><button onclick="showStep(4)" class="btn btn-ghost">← Back</button><button onclick="submitStep5()" class="btn btn-gold">Submit Application →</button></div>
+      </div>
+    </div>
+
+    <!-- STEP 6: Awaiting / Contract -->
+    <div id="step-6" class="hidden">
+      <!-- Awaiting -->
+      <div id="s6-await" class="card-gold p-4 text-center">
+        <div style="font-size:3rem;margin-bottom:1rem">⏳</div>
+        <h2 style="font-size:1.8rem" class="mb-2">Application <em style="font-style:italic;color:var(--gold)">Under Review</em></h2>
+        <p class="text-sm text-muted mb-4" style="max-width:420px;margin-left:auto;margin-right:auto">Your application has been submitted. Our team will review your documents and notify you when your contract is ready to sign.</p>
+        <div class="card" style="max-width:400px;margin:0 auto;text-align:left"><p class="label mb-2">Submitted Summary</p><div id="s6-summary" class="text-sm text-muted" style="line-height:2"></div></div>
+        <button onclick="showView('view-model-dashboard')" class="btn btn-gold mt-4">Go to My Dashboard →</button>
+      </div>
+      <!-- Contract Ready -->
+      <div id="s6-contract" class="card-gold p-4 hidden">
+        <p class="label mb-1">Final Step</p>
+        <h2 style="font-size:1.8rem" class="mb-1">Sign Your <em style="font-style:italic;color:var(--gold)">Contract</em></h2>
+        <p class="text-sm text-muted mb-3">Your contract is ready. Please read carefully and sign to begin your journey with Ei8-In Studios.</p>
+        <div class="clause-box mb-3" id="s6-txt">Loading contract...</div>
+        <label class="checkbox-label mb-3"><input type="checkbox" id="s6-agree"><span>I have read and agree to all terms of this Contract with Ei8-In Studios.</span></label>
+        <div class="input-group">
+          <label class="input-label">Final Digital Signature</label>
+          <div class="sig-wrap"><canvas id="sig-contract"></canvas></div>
+          <button type="button" onclick="clearSig('sig-contract')" class="btn btn-ghost btn-sm mt-1">Clear</button>
+        </div>
+        <div class="flex justify-between mt-2"><div></div><button onclick="submitContract()" class="btn btn-gold">Sign Contract &amp; Activate →</button></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- MODEL DASHBOARD                                                     -->
+<!-- ================================================================== -->
+<div id="view-model-dashboard" class="view">
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="brand"><div class="brand-logo">E8</div><div><span class="brand-name">Ei8-In Studios</span><span class="brand-tag">My Dashboard</span></div></div>
+      <div class="flex items-center gap-2">
+        <span id="dash-name" class="text-sm text-muted hide-m"></span>
+        <button onclick="logoutModel()" class="btn btn-ghost btn-sm">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+  <div class="container" style="padding-top:2rem;padding-bottom:3rem">
+    <div class="tabs mb-4">
+      <button class="tab active" onclick="dashTab(this,'d-overview')">Overview</button>
+      <button class="tab" onclick="dashTab(this,'d-docs')">My Documents</button>
+      <button class="tab" onclick="dashTab(this,'d-services')">My Services</button>
+      <button class="tab" onclick="dashTab(this,'d-media')">My Media</button>
+      <button class="tab" onclick="dashTab(this,'d-profile')">Profile</button>
+      <button class="tab" onclick="dashTab(this,'d-notifs')">Notifications <span id="notif-badge" class="badge badge-red hidden" style="margin-left:4px;vertical-align:middle"></span></button>
+    </div>
+
+    <!-- Overview -->
+    <div id="d-overview" class="tab-content active">
+      <div id="d-contract-prompt" class="hidden">
+        <div class="alert alert-info flex items-center justify-between gap-2 mb-4" style="flex-wrap:wrap">
+          <div><strong class="gold">🎉 Your contract is ready!</strong><p class="text-sm mt-1">Ei8-In Studios has approved your application. Sign to complete your onboarding.</p></div>
+          <button onclick="goContractStep()" class="btn btn-gold btn-sm">Sign Now →</button>
+        </div>
+      </div>
+      <div class="grid-4 mb-4">
+        <div class="stat-card"><div class="stat-value" id="d-stat-status" style="font-size:1rem;word-break:break-word">—</div><div class="stat-label">Status</div></div>
+        <div class="stat-card"><div class="stat-value" id="d-stat-docs">0</div><div class="stat-label">Docs Signed</div></div>
+        <div class="stat-card"><div class="stat-value" id="d-stat-svcs">0</div><div class="stat-label">Services</div></div>
+        <div class="stat-card"><div class="stat-value" id="d-stat-joined" style="font-size:1.1rem">—</div><div class="stat-label">Member Since</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><p class="label mb-3">Onboarding Journey</p><div class="timeline" id="d-timeline"><div class="loader"></div></div></div>
+        <div class="card"><p class="label mb-2">Recent Notifications</p><div id="d-recent-notifs"><p class="text-sm text-muted">No notifications.</p></div></div>
+      </div>
+    </div>
+
+    <!-- Documents -->
+    <div id="d-docs" class="tab-content">
+      <div class="sec-header"><div><h2 class="sec-title">My Documents</h2><p class="sec-sub">All signed legal documents</p></div></div>
+      <div id="docs-list" class="space-y"><div class="loader"></div></div>
+    </div>
+
+    <!-- Services -->
+    <div id="d-services" class="tab-content">
+      <div class="sec-header"><div><h2 class="sec-title">My Services</h2><p class="sec-sub">Services you are enrolled in</p></div></div>
+      <div id="svcs-list" class="grid-2"><div class="loader"></div></div>
+    </div>
+
+    <!-- Media -->
+    <div id="d-media" class="tab-content">
+      <div class="sec-header">
+        <div><h2 class="sec-title">My Media</h2><p class="sec-sub">Upload images and videos (any format, any size)</p></div>
+        <div class="flex gap-2">
+          <input type="file" id="mediaUploadInput" accept="image/*,video/*,audio/*,application/*" multiple style="display:none" onchange="uploadMediaFiles(this.files)">
+          <button onclick="document.getElementById('mediaUploadInput').click()" class="btn btn-gold">+ Upload Files</button>
+        </div>
+      </div>
+      <div id="mediaUploadProgress" class="hidden mt-2"><div class="progress-bar" id="uploadProgressBar"></div></div>
+      <div id="mediaGrid" class="media-grid"><div class="loader"></div></div>
+    </div>
+
+    <!-- Profile -->
+    <div id="d-profile" class="tab-content">
+      <div class="sec-header"><div><h2 class="sec-title">My Profile</h2><p class="sec-sub">Information on file</p></div></div>
+      <div class="card-gold p-4" id="d-profile-content"><div class="loader"></div></div>
+    </div>
+
+    <!-- Notifications -->
+    <div id="d-notifs" class="tab-content">
+      <div class="sec-header"><div><h2 class="sec-title">Notifications</h2><p class="sec-sub">Messages from Ei8-In Studios</p></div></div>
+      <div id="notifs-list"><div class="loader"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- ADMIN AUTH                                                          -->
+<!-- ================================================================== -->
+<div id="view-admin-auth" class="view">
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="brand"><div class="brand-logo">E8</div><div><span class="brand-name">Ei8-In Studios</span><span class="brand-tag">Administration</span></div></div>
+      <button onclick="showView('view-landing')" class="btn btn-ghost btn-sm">← Back</button>
+    </div>
+  </nav>
+  <div class="container-sm" style="padding-top:3rem;padding-bottom:3rem">
+    <div class="card-gold p-4">
+      <p class="label mb-1">Restricted Access</p>
+      <h2 style="font-size:1.8rem" class="mb-3">Admin <em style="font-style:italic;color:var(--gold)">Authentication</em></h2>
+      <div class="alert alert-info mb-3" style="font-size:.8rem">Authorized Ei8-In Studios management personnel only.</div>
+      <div class="input-group"><label class="input-label">Admin Email</label><input type="email" id="adminEmail" placeholder="admin@ei8instudios.com"></div>
+      <div class="input-group"><label class="input-label">Password</label><input type="password" id="adminPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')loginAdmin()"></div>
+      <button onclick="loginAdmin()" class="btn btn-gold btn-full">Authenticate →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- ADMIN DASHBOARD                                                     -->
+<!-- ================================================================== -->
+<div id="view-admin-dashboard" class="view">
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="brand"><div class="brand-logo">E8</div><div><span class="brand-name">Ei8-In Studios</span><span class="brand-tag">Admin Panel</span></div></div>
+      <div class="flex items-center gap-2">
+        <span id="admin-name" class="text-sm text-muted hide-m"></span>
+        <button onclick="logoutAdmin()" class="btn btn-ghost btn-sm">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sb-section">Management</div>
+      <button class="sb-link active" onclick="adminNav(this,'a-overview')">📊 Overview</button>
+      <button class="sb-link" onclick="adminNav(this,'a-models')">👤 Models</button>
+      <div class="sb-section">Content</div>
+      <button class="sb-link" onclick="adminNav(this,'a-clauses')">📄 Clause Editor</button>
+      <button class="sb-link" onclick="adminNav(this,'a-services')">🛍 Services</button>
+      <div class="sb-section">Communication</div>
+      <button class="sb-link" onclick="adminNav(this,'a-notifs')">🔔 Notifications</button>
+    </aside>
+    <main class="admin-main">
+
+      <!-- OVERVIEW -->
+      <section id="a-overview" class="admin-section active">
+        <div class="sec-header">
+          <div><h2 class="sec-title">Overview</h2><p class="sec-sub">Studio management at a glance</p></div>
+          <button onclick="loadAdminData()" class="btn btn-ghost btn-sm">↻ Refresh</button>
+        </div>
+        <div class="grid-4 mb-4">
+          <div class="stat-card"><div class="stat-value" id="a-total">—</div><div class="stat-label">Total Models</div></div>
+          <div class="stat-card"><div class="stat-value" id="a-pending">—</div><div class="stat-label">Pending Review</div></div>
+          <div class="stat-card"><div class="stat-value" id="a-contracted">—</div><div class="stat-label">Contracted</div></div>
+          <div class="stat-card"><div class="stat-value" id="a-svcs">—</div><div class="stat-label">Active Services</div></div>
+        </div>
+        <div class="card"><p class="label mb-3">Recent Submissions</p><div id="a-recent"><div class="loader"></div></div></div>
+      </section>
+
+      <!-- MODELS -->
+      <section id="a-models" class="admin-section">
+        <div class="sec-header"><div><h2 class="sec-title">Model Management</h2><p class="sec-sub">All registered models</p></div></div>
+        <div class="tabs mb-4">
+          <button class="tab active" onclick="filterModels(this,'all')">All</button>
+          <button class="tab" onclick="filterModels(this,'pending')">Pending</button>
+          <button class="tab" onclick="filterModels(this,'services_selected')">Awaiting Contract</button>
+          <button class="tab" onclick="filterModels(this,'contract_ready')">Contract Ready</button>
+          <button class="tab" onclick="filterModels(this,'contracted')">Contracted</button>
+          <button class="tab" onclick="filterModels(this,'active')">Active</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Model</th><th>Status</th><th>Stage Name</th><th>Joined</th><th>Docs</th><th>Actions</th></tr></thead>
+            <tbody id="models-tbody"><tr><td colspan="6"><div class="loader"></div></td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- CLAUSES -->
+      <section id="a-clauses" class="admin-section">
+        <div class="sec-header">
+          <div><h2 class="sec-title">Clause Editor</h2><p class="sec-sub">Edit legal documents shown to models</p></div>
+          <button onclick="saveClauses()" class="btn btn-gold">Publish All Changes</button>
+        </div>
+        <div class="tabs mb-4">
+          <button class="tab active" onclick="clauseTab(this,'cl-agreement')">Agreement</button>
+          <button class="tab" onclick="clauseTab(this,'cl-consent')">Consent Form</button>
+          <button class="tab" onclick="clauseTab(this,'cl-nda')">NDA</button>
+          <button class="tab" onclick="clauseTab(this,'cl-contract')">Contract</button>
+        </div>
+        <div id="cl-agreement" class="tab-content active"><div class="card"><label class="input-label mb-2">Model Agreement Text</label><textarea id="edit-agreement" style="min-height:420px;font-family:'DM Mono',monospace;font-size:.8rem;line-height:1.7"></textarea></div></div>
+        <div id="cl-consent"   class="tab-content"><div class="card"><label class="input-label mb-2">Consent Form Text</label><textarea id="edit-consent" style="min-height:420px;font-family:'DM Mono',monospace;font-size:.8rem;line-height:1.7"></textarea></div></div>
+        <div id="cl-nda"       class="tab-content"><div class="card"><label class="input-label mb-2">NDA Text</label><textarea id="edit-nda" style="min-height:420px;font-family:'DM Mono',monospace;font-size:.8rem;line-height:1.7"></textarea></div></div>
+        <div id="cl-contract"  class="tab-content"><div class="card"><label class="input-label mb-2">Contract Text</label><textarea id="edit-contract" style="min-height:420px;font-family:'DM Mono',monospace;font-size:.8rem;line-height:1.7"></textarea></div></div>
+      </section>
+
+      <!-- SERVICES -->
+      <section id="a-services" class="admin-section">
+        <div class="sec-header">
+          <div><h2 class="sec-title">Services Manager</h2><p class="sec-sub">Add or remove available services</p></div>
+          <button onclick="openSvcModal()" class="btn btn-gold">+ Add Service</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Service</th><th>Category</th><th>Description</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="svcs-tbody"><tr><td colspan="5"><div class="loader"></div></td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- NOTIFICATIONS -->
+      <section id="a-notifs" class="admin-section">
+        <div class="sec-header"><div><h2 class="sec-title">Send Notification</h2><p class="sec-sub">Message models directly</p></div></div>
+        <div class="card-gold p-4 mb-4">
+          <div class="input-group"><label class="input-label">Recipient</label><select id="notif-to"><option value="all">All Models</option></select></div>
+          <div class="input-group"><label class="input-label">Message</label><textarea id="notif-msg" placeholder="Type your message..."></textarea></div>
+          <button onclick="sendNotif()" class="btn btn-gold">Send Notification</button>
+        </div>
+        <div class="card"><p class="label mb-3">Sent History</p><div id="a-notifs-list"><div class="loader"></div></div></div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- MODEL DETAIL MODAL                                                  -->
+<!-- ================================================================== -->
+<div id="model-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="flex justify-between items-center mb-3">
+      <h2 style="font-size:1.5rem" id="mm-title">Model Details</h2>
+      <button onclick="closeModal('model-modal')" class="btn btn-ghost btn-sm">✕</button>
+    </div>
+    <div id="mm-body"><div class="loader"></div></div>
+    <div class="divider"></div>
+    <div><p class="label mb-2">Uploaded Media</p><div id="admin-media-list" class="media-grid"></div></div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- SERVICE MODAL                                                       -->
+<!-- ================================================================== -->
+<div id="svc-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="flex justify-between items-center mb-3">
+      <h2 style="font-size:1.5rem" id="svc-modal-title">Add Service</h2>
+      <button onclick="closeModal('svc-modal')" class="btn btn-ghost btn-sm">✕</button>
+    </div>
+    <input type="hidden" id="svc-id">
+    <div class="input-group"><label class="input-label">Service Name *</label><input type="text" id="svc-name" placeholder="e.g. Photo Shoots"></div>
+    <div class="input-group"><label class="input-label">Category</label><input type="text" id="svc-cat" placeholder="e.g. Photography, Video, Events"></div>
+    <div class="input-group"><label class="input-label">Description</label><textarea id="svc-desc" placeholder="Brief description..." style="min-height:80px"></textarea></div>
+    <div class="input-group"><label class="input-label">Visibility</label><select id="svc-active"><option value="true">Active — visible to models</option><option value="false">Inactive — hidden</option></select></div>
+    <button onclick="saveService()" class="btn btn-gold btn-full">Save Service</button>
+  </div>
+</div>
+
+<!-- App entry point (ES module) -->
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
