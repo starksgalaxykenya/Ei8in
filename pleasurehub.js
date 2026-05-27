@@ -69,11 +69,14 @@ export async function loadModelsForPleasure() {
     return;
   }
   container.innerHTML = models.map(m => `
-    <div class="card pleasure-model-card">
-      <h3 class="model-name">${escapeHtml(m.stageName)}</h3>
-      <p class="model-bio">${escapeHtml(m.publicBio)}</p>
+  <div class="card pleasure-model-card">
+    <div class="flex items-center gap-3 mb-2">
+      ${m.profilePictureUrl ? `<img src="${escapeHtml(m.profilePictureUrl)}" class="model-avatar" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid var(--gold)">` : `<div class="model-avatar-placeholder" style="width:50px; height:50px; border-radius:50%; background:var(--sfrr); display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:var(--gold)">📸</div>`}
+      <h3 class="model-name" style="margin-bottom:0">${escapeHtml(m.stageName)}</h3>
     </div>
-  `).join('');
+    <p class="model-bio">${escapeHtml(m.publicBio)}</p>
+  </div>
+`).join('');
 }
 
 function escapeHtml(str) {
