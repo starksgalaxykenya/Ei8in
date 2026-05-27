@@ -57,6 +57,7 @@
       <div class="hero-sep"></div>
       <p class="text-muted mt-3 mb-4" style="font-size:1rem;line-height:1.9;max-width:480px;margin-left:auto;margin-right:auto">The premier model management platform. Streamlined onboarding, legal compliance, and talent administration &mdash; refined for the modern industry.</p>
       <div class="flex gap-2 justify-center" style="flex-wrap:wrap">
+        <button onclick="showView('view-pleasurehub-auth')" class="btn btn-ghost btn-lg">Pleasure Hub →</button>
         <button onclick="showView('view-model-auth')" class="btn btn-gold btn-lg">↗ Model Portal</button>
         <button onclick="showView('view-admin-auth')" class="btn btn-ghost btn-lg">Admin Access →</button>
       </div>
@@ -230,6 +231,7 @@
         <p class="text-sm text-muted mb-4" style="max-width:420px;margin-left:auto;margin-right:auto">Your application has been submitted. Our team will review your documents and notify you when your contract is ready to sign.</p>
         <div class="card" style="max-width:400px;margin:0 auto;text-align:left"><p class="label mb-2">Submitted Summary</p><div id="s6-summary" class="text-sm text-muted" style="line-height:2"></div></div>
         <button onclick="showView('view-model-dashboard')" class="btn btn-gold mt-4">Go to My Dashboard →</button>
+        <button class="tab" onclick="dashTab(this,'d-public')">Public Bio</button>
       </div>
       <!-- Contract Ready -->
       <div id="s6-contract" class="card-gold p-4 hidden">
@@ -272,6 +274,18 @@
       <button class="tab" onclick="dashTab(this,'d-profile')">Profile</button>
       <button class="tab" onclick="dashTab(this,'d-notifs')">Notifications <span id="notif-badge" class="badge badge-red hidden" style="margin-left:4px;vertical-align:middle"></span></button>
     </div>
+    <div id="d-public" class="tab-content">
+  <div class="sec-header">
+    <div><h2 class="sec-title">Public Bio</h2><p class="sec-sub">This information will be visible on the Pleasure Hub</p></div>
+  </div>
+  <div class="card-gold p-4">
+    <div class="input-group">
+      <label class="input-label">Your Public Bio</label>
+      <textarea id="model-public-bio" rows="4" placeholder="Tell the audience about yourself... (max 500 characters)"></textarea>
+    </div>
+    <button onclick="savePublicBio()" class="btn btn-gold">Save Bio</button>
+  </div>
+</div>
 
     <!-- Overview -->
     <div id="d-overview" class="tab-content active">
@@ -461,6 +475,65 @@
   </div>
 </div>
 
+  <!-- ================================================================== -->
+<!-- PLEASURE HUB AUTH                                                   -->
+<!-- ================================================================== -->
+<div id="view-pleasurehub-auth" class="view">
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="brand"><div class="brand-logo">E8</div><div><span class="brand-name">Ei8-In Studios</span><span class="brand-tag">Pleasure Hub</span></div></div>
+      <button onclick="showView('view-landing')" class="btn btn-ghost btn-sm">← Back</button>
+    </div>
+  </nav>
+  <div class="container-sm" style="padding-top:3rem;padding-bottom:3rem">
+    <div class="card-gold p-4">
+      <div class="tabs mb-4">
+        <button class="tab active" onclick="switchPleasureTab(this,'pleasure-login')">Sign In</button>
+        <button class="tab" onclick="switchPleasureTab(this,'pleasure-register')">Join Hub</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="pleasure-login" class="tab-content active">
+        <p class="label mb-3">Welcome back</p>
+        <div class="input-group"><label class="input-label">Email</label><input type="email" id="pleasureLoginEmail" placeholder="fan@example.com"></div>
+        <div class="input-group"><label class="input-label">Password</label><input type="password" id="pleasureLoginPass" placeholder="••••••"></div>
+        <button onclick="loginPleasure()" class="btn btn-gold btn-full">Enter Pleasure Hub →</button>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="pleasure-register" class="tab-content">
+        <p class="label mb-3">Create fan account</p>
+        <div class="input-group"><label class="input-label">Display Name</label><input type="text" id="pleasureName" placeholder="Your name"></div>
+        <div class="input-group"><label class="input-label">Email</label><input type="email" id="pleasureEmail" placeholder="fan@example.com"></div>
+        <div class="input-group"><label class="input-label">Password (min 6 chars)</label><input type="password" id="pleasurePass" placeholder="••••••"></div>
+        <button onclick="registerPleasure()" class="btn btn-gold btn-full">Create Account →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- ================================================================== -->
+<!-- PLEASURE HUB DASHBOARD                                              -->
+<!-- ================================================================== -->
+<div id="view-pleasurehub-dashboard" class="view">
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="brand"><div class="brand-logo">E8</div><div><span class="brand-name">Ei8-In Studios</span><span class="brand-tag">Pleasure Hub</span></div></div>
+      <div class="flex items-center gap-2">
+        <span id="pleasure-user-name" class="text-sm text-muted hide-m"></span>
+        <button onclick="logoutPleasure()" class="btn btn-ghost btn-sm">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+  <div class="container" style="padding-top:2rem;padding-bottom:3rem">
+    <div class="sec-header">
+      <div><h2 class="sec-title">Our Models</h2><p class="sec-sub">Discover talent</p></div>
+    </div>
+    <div id="pleasure-models-grid" class="grid-2">
+      <div class="loader"></div>
+    </div>
+  </div>
+</div>
 <!-- ================================================================== -->
 <!-- MODEL DETAIL MODAL                                                  -->
 <!-- ================================================================== -->
@@ -495,6 +568,7 @@
 </div>
 
 <!-- App entry point (ES module) -->
+<script type="module" src="pleasurehub.js"></script>
 <script type="module" src="main.js"></script>
 </body>
 </html>
