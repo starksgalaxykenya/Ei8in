@@ -344,6 +344,12 @@ async function loadDashboard() {
     <div>Address: ${state.modelData.address || '—'}</div>
     <div>Emergency: ${state.modelData.emergency || '—'}</div>`;
 
+    // Load public bio into the dashboard textarea
+  const bioTextarea = document.getElementById('model-public-bio');
+  if (bioTextarea) {
+    bioTextarea.value = state.modelData?.publicBio || '';
+  }
+
   await loadModelNotifs(true);
 }
 
@@ -473,8 +479,3 @@ window.savePublicBio = async () => {
   await updateDoc(doc(db, 'models', state.currentUser.uid), { publicBio: bio });
   toast('Public bio saved', 'success');
 };
-  // Load public bio into the dashboard bio field
-  const bioTextarea = document.getElementById('model-public-bio');
-  if (bioTextarea) {
-    bioTextarea.value = state.modelData.publicBio || '';
-  }
