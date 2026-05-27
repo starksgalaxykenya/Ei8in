@@ -349,6 +349,13 @@ async function loadDashboard() {
   if (bioTextarea) {
     bioTextarea.value = state.modelData?.publicBio || '';
   }
+  // Load profile picture preview
+const avatarImg = document.getElementById('avatar-img');
+if (avatarImg && state.modelData?.profilePictureUrl) {
+  avatarImg.src = state.modelData.profilePictureUrl;
+} else if (avatarImg) {
+  avatarImg.src = '';
+}
 
   await loadModelNotifs(true);
 }
@@ -478,4 +485,38 @@ window.savePublicBio = async () => {
   if (bio.length > 500) return toast('Bio must be 500 characters or less', 'error');
   await updateDoc(doc(db, 'models', state.currentUser.uid), { publicBio: bio });
   toast('Public bio saved', 'success');
+};
+// Profile picture upload
+window.uploadProfilePicture = async (file) => {
+  if (!file) return;
+  if (!file.type.startsWith('image/')) return toast('Please select an image file', 'error');
+  const maxSize = 2 * 1024 * 1024; // 2MB
+  if (file.size > maxSize) return toast('Image must be less than 2MB', 'error');
+
+  const storagePath = `profile_pictures/${state.currentUser.uid}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+  const storageRef = ref(storage, storagePath);
+  const uploadTask = uploadBytesResumable(storageRef, file);
+
+  uploadTask.on('state_changed',
+    null,
+    (error) => toast('Upload failed: ' + error.message, 'error'),
+    async () => {
+      const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+      await updateDoc(doc(db, 'models', state.currentUser.uid), { profilePictureUrl: downloadUrl });
+      toast('Profile picture updated', 'success');
+      // Update preview
+      const img = document.getElementById('avatar-img');
+      if (img) img.src = downloadUrl;
+    }
+  );
+};
+
+window.removeProfilePicture = async () => {
+  if (confirm('Remove your profile picture?')) {
+    // Optionally delete the old file from storage (optional, can be left as orphan)
+    await updateDoc(doc(db, 'models', state.currentUser.uid), { profilePictureUrl: null });
+    const img = document.getElementById('avatar-img');
+    if (img) img.src = '';
+    toast('Profile picture removed', 'info');
+  }
 };
