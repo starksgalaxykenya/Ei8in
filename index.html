@@ -231,7 +231,6 @@
         <p class="text-sm text-muted mb-4" style="max-width:420px;margin-left:auto;margin-right:auto">Your application has been submitted. Our team will review your documents and notify you when your contract is ready to sign.</p>
         <div class="card" style="max-width:400px;margin:0 auto;text-align:left"><p class="label mb-2">Submitted Summary</p><div id="s6-summary" class="text-sm text-muted" style="line-height:2"></div></div>
         <button onclick="showView('view-model-dashboard')" class="btn btn-gold mt-4">Go to My Dashboard →</button>
-        <button class="tab" onclick="dashTab(this,'d-public')">Public Bio</button>
       </div>
       <!-- Contract Ready -->
       <div id="s6-contract" class="card-gold p-4 hidden">
@@ -274,17 +273,6 @@
       <button class="tab" onclick="dashTab(this,'d-profile')">Profile</button>
       <button class="tab" onclick="dashTab(this,'d-notifs')">Notifications <span id="notif-badge" class="badge badge-red hidden" style="margin-left:4px;vertical-align:middle"></span></button>
     </div>
-    <div id="d-public" class="tab-content">
-  <div class="sec-header">
-    <div><h2 class="sec-title">Public Bio</h2><p class="sec-sub">This information will be visible on the Pleasure Hub</p></div>
-  </div>
-  <div class="card-gold p-4">
-    <div class="input-group">
-      <label class="input-label">Your Public Bio</label>
-      <textarea id="model-public-bio" rows="4" placeholder="Tell the audience about yourself... (max 500 characters)"></textarea>
-    </div>
-    <button onclick="savePublicBio()" class="btn btn-gold">Save Bio</button>
-  </div>
 </div>
 
     <!-- Overview -->
@@ -332,11 +320,42 @@
       <div id="mediaGrid" class="media-grid"><div class="loader"></div></div>
     </div>
 
-    <!-- Profile -->
-    <div id="d-profile" class="tab-content">
-      <div class="sec-header"><div><h2 class="sec-title">My Profile</h2><p class="sec-sub">Information on file</p></div></div>
-      <div class="card-gold p-4" id="d-profile-content"><div class="loader"></div></div>
+    <!-- Profile Tab -->
+<div id="d-profile" class="tab-content">
+  <div class="sec-header">
+    <div><h2 class="sec-title">My Profile</h2><p class="sec-sub">Information on file & public profile</p></div>
+  </div>
+  <div class="card-gold p-4 mb-4" id="d-profile-content">
+    <div class="loader"></div>
+  </div>
+
+  <!-- Public Bio Section -->
+  <div class="card-gold p-4 mb-4">
+    <h3 class="sec-title" style="font-size:1.2rem">Public Bio</h3>
+    <p class="sec-sub mb-3">This will be visible on the Pleasure Hub</p>
+    <div class="input-group">
+      <label class="input-label">Your Public Bio (max 500 chars)</label>
+      <textarea id="model-public-bio" rows="4" placeholder="Tell the audience about yourself..."></textarea>
     </div>
+    <button onclick="savePublicBio()" class="btn btn-gold">Save Bio</button>
+  </div>
+
+  <!-- Profile Picture Section -->
+  <div class="card-gold p-4">
+    <h3 class="sec-title" style="font-size:1.2rem">Profile Picture</h3>
+    <p class="sec-sub mb-3">This image will appear next to your name on Pleasure Hub</p>
+    <div class="flex items-center gap-4 mb-3" style="flex-wrap:wrap">
+      <div id="current-avatar-preview" style="width:80px; height:80px; border-radius:50%; background:var(--sfrr); border:2px solid var(--gold); overflow:hidden; display:flex; align-items:center; justify-content:center">
+        <img id="avatar-img" src="" style="width:100%; height:100%; object-fit:cover" alt="Avatar">
+      </div>
+      <div>
+        <input type="file" id="profile-pic-input" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="uploadProfilePicture(this.files[0])">
+        <button onclick="document.getElementById('profile-pic-input').click()" class="btn btn-ghost btn-sm">Upload Picture</button>
+        <button onclick="removeProfilePicture()" class="btn btn-danger btn-sm ml-2">Remove</button>
+      </div>
+    </div>
+  </div>
+</div>
 
     <!-- Notifications -->
     <div id="d-notifs" class="tab-content">
