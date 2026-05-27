@@ -5,6 +5,7 @@
 export const state = {
   currentUser:       null,
   modelData:         null,
+  pleasureUser:      null, 
   clauses:           {},
   allSvcs:           [],
   allModels:         [],
