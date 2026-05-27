@@ -286,3 +286,23 @@ tbody tr:hover { background:var(--sfr) }
 .media-info   { padding:.5rem; font-size:.7rem; color:var(--tm); word-break:break-word }
 .media-actions{ display:flex; gap:.5rem; padding:.3rem .5rem .5rem }
 .progress-bar { height:3px; background:var(--gold); width:0%; transition:width .2s }
+
+/* Pleasure Hub model cards */
+.pleasure-model-card {
+  transition: transform 0.2s;
+}
+.pleasure-model-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--gold);
+}
+.model-name {
+  font-family: 'Cormorant Garant', serif;
+  font-size: 1.5rem;
+  color: var(--gold);
+  margin-bottom: 0.5rem;
+}
+.model-bio {
+  color: var(--tm);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
