@@ -467,3 +467,14 @@ window.deleteMedia = async (mediaId, storagePath) => {
     } catch (e) { toast('Delete failed', 'error'); }
   }
 };
+window.savePublicBio = async () => {
+  const bio = document.getElementById('model-public-bio').value;
+  if (bio.length > 500) return toast('Bio must be 500 characters or less', 'error');
+  await updateDoc(doc(db, 'models', state.currentUser.uid), { publicBio: bio });
+  toast('Public bio saved', 'success');
+};
+  // Load public bio into the dashboard bio field
+  const bioTextarea = document.getElementById('model-public-bio');
+  if (bioTextarea) {
+    bioTextarea.value = state.modelData.publicBio || '';
+  }
