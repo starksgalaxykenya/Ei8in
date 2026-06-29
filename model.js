@@ -18,6 +18,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 import { auth, db, storage, gProvider } from './firebase-config.js';
+import { loadModelInbox } from './pleasurehub.js';
 import { state }                        from './state.js';
 import {
   showView, toast, v, fmtDate, badge,
@@ -349,6 +350,8 @@ async function loadDashboard() {
   if (bioTextarea) {
     bioTextarea.value = state.modelData?.publicBio || '';
   }
+  // Load gallery preview in Profile tab
+  loadGalleryPreview();
   // Load profile picture preview
 const avatarImg = document.getElementById('avatar-img');
 if (avatarImg && state.modelData?.profilePictureUrl) {
@@ -390,8 +393,9 @@ window.dashTab = (btn, id) => {
   document.querySelectorAll('#view-model-dashboard .tab-content').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById(id).classList.add('active');
-  if (id === 'd-notifs') loadModelNotifs();
-  if (id === 'd-media')  loadMedia();
+  if (id === 'd-notifs')   loadModelNotifs();
+  if (id === 'd-media')    loadMedia();
+  if (id === 'd-messages') loadModelInbox();
 };
 
 // ── MEDIA UPLOAD & MANAGEMENT ─────────────────────────────────────────
@@ -520,3 +524,36 @@ window.removeProfilePicture = async () => {
     toast('Profile picture removed', 'info');
   }
 };
+
+// ── GALLERY PREVIEW (Profile Tab) ────────────────────────────────
+async function loadGalleryPreview() {
+  if (!state.currentUser) return;
+  const el = document.getElementById('profile-gallery-preview');
+  if (!el) return;
+
+  const snap = await getDocs(query(
+    collection(db, 'media'),
+    where('modelId', '==', state.currentUser.uid),
+    orderBy('uploadDate', 'desc')
+  ));
+
+  const images = [];
+  snap.forEach(d => {
+    const f = d.data();
+    if (f.fileType && f.fileType.startsWith('image/')) images.push(f);
+  });
+
+  if (images.length === 0) {
+    el.innerHTML = '<p class="text-muted text-sm">No images uploaded yet. Go to <strong>My Media</strong> to upload.</p>';
+    return;
+  }
+
+  el.innerHTML = images.slice(0, 8).map(img =>
+    `<div class="ph-gallery__item" style="pointer-events:none">
+      <img src="${img.fileUrl}" alt="Gallery" loading="lazy">
+    </div>`
+  ).join('');
+  if (images.length > 8) {
+    el.innerHTML += `<div class="ph-gallery__item" style="background:var(--sfrr);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--gold)">+${images.length - 8} more</div>`;
+  }
+}
