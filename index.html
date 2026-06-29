@@ -272,6 +272,7 @@
       <button class="tab" onclick="dashTab(this,'d-media')">My Media</button>
       <button class="tab" onclick="dashTab(this,'d-profile')">Profile</button>
       <button class="tab" onclick="dashTab(this,'d-notifs')">Notifications <span id="notif-badge" class="badge badge-red hidden" style="margin-left:4px;vertical-align:middle"></span></button>
+      <button class="tab" onclick="dashTab(this,'d-messages')">Messages <span id="msg-badge" class="badge badge-red hidden" style="margin-left:4px;vertical-align:middle"></span></button>
     </div>
 </div>
 
@@ -355,12 +356,42 @@
       </div>
     </div>
   </div>
+
+  <!-- Public Gallery Section -->
+  <div class="card-gold p-4 mt-2">
+    <h3 class="sec-title" style="font-size:1.2rem">Public Gallery</h3>
+    <p class="sec-sub mb-3">Images visible to fans on your Pleasure Hub profile. Go to <strong>My Media</strong> tab to upload images — they appear here automatically.</p>
+    <div id="profile-gallery-preview" class="ph-gallery ph-gallery--small">
+      <div class="loader"></div>
+    </div>
+  </div>
 </div>
 
     <!-- Notifications -->
     <div id="d-notifs" class="tab-content">
       <div class="sec-header"><div><h2 class="sec-title">Notifications</h2><p class="sec-sub">Messages from Ei8-In Studios</p></div></div>
       <div id="notifs-list"><div class="loader"></div></div>
+    </div>
+
+    <!-- Messages (Fan Inbox) -->
+    <div id="d-messages" class="tab-content">
+      <div class="sec-header"><div><h2 class="sec-title">Messages</h2><p class="sec-sub">Fan conversations</p></div></div>
+      <div class="model-inbox-layout">
+        <div class="model-inbox-sidebar">
+          <div id="model-inbox-list" class="model-inbox-list"><div class="loader"></div></div>
+        </div>
+        <div id="model-chat-panel" class="model-chat-panel hidden">
+          <input type="hidden" id="model-chat-conv-id">
+          <div class="model-chat-panel__header">
+            <span id="model-chat-title" class="model-chat-panel__title">Select a conversation</span>
+          </div>
+          <div id="model-chat-messages" class="model-chat-panel__messages"></div>
+          <div class="model-chat-panel__compose">
+            <textarea id="model-chat-input" class="ph-chatbox__input" placeholder="Type a reply…" rows="1" onkeydown="modelChatKeydown(event)"></textarea>
+            <button class="ph-chatbox__send" onclick="sendModelReply()">Send</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -545,11 +576,52 @@
     </div>
   </nav>
   <div class="container" style="padding-top:2rem;padding-bottom:3rem">
-    <div class="sec-header">
-      <div><h2 class="sec-title">Our Models</h2><p class="sec-sub">Discover talent</p></div>
+    <div class="ph-discover-header">
+      <div>
+        <h2 class="sec-title">Discover</h2>
+        <p class="sec-sub">Browse our exclusive talent roster</p>
+      </div>
     </div>
-    <div id="pleasure-models-grid" class="grid-2">
+
+    <!-- Search bar -->
+    <div class="ph-search-wrap">
+      <span class="ph-search-icon">🔍</span>
+      <input type="text" id="ph-search" class="ph-search-input" placeholder="Search by name or bio…" oninput="phSearch()">
+    </div>
+
+    <!-- Service filter chips -->
+    <div id="ph-service-filters" class="ph-chips-row"></div>
+
+    <!-- Model grid -->
+    <div id="pleasure-models-grid" class="ph-models-grid">
       <div class="loader"></div>
+    </div>
+  </div>
+
+  <!-- Model Profile Modal -->
+  <div id="ph-profile-modal" class="ph-modal-overlay hidden" onclick="if(event.target===this)closePHProfile()">
+    <div class="ph-modal">
+      <button class="ph-modal__close" onclick="closePHProfile()">✕</button>
+      <div id="ph-profile-body"></div>
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div id="ph-lightbox" class="ph-lightbox hidden" onclick="phCloseLightbox()">
+    <button class="ph-lightbox__close" onclick="phCloseLightbox()">✕</button>
+    <img id="ph-lightbox-img" src="" alt="Gallery">
+  </div>
+
+  <!-- Chat Box (floating) -->
+  <div id="ph-chatbox" class="ph-chatbox hidden">
+    <div class="ph-chatbox__header">
+      <span id="ph-chat-title" class="ph-chatbox__title">Chat</span>
+      <button onclick="closeChatBox()" class="ph-chatbox__close">✕</button>
+    </div>
+    <div id="ph-chat-messages" class="ph-chatbox__messages"></div>
+    <div class="ph-chatbox__compose">
+      <textarea id="ph-chat-input" class="ph-chatbox__input" placeholder="Type a message…" rows="1" onkeydown="phChatKeydown(event)"></textarea>
+      <button class="ph-chatbox__send" onclick="sendChatMessage()">Send</button>
     </div>
   </div>
 </div>
