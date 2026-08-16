@@ -18,7 +18,7 @@ import {
 
 import { auth, db, storage } from './firebase-config.js';
 import { state }             from './state.js';
-import { toast, openModal, closeModal, v, fmtDate, badge } from './utils.js';
+import { toast, openModal, closeModal, v, fmtDate, badge, isOverdue, dueDate } from './utils.js';
 
 // ── ADMIN AUTH ────────────────────────────────────────────────────────
 window.loginAdmin = async () => {
@@ -44,6 +44,8 @@ export async function loadAdminData() {
   await loadRecentSubs();
   await loadAdminNotifs();
   await fillNotifSelect();
+  await loadCommissionSettings();
+  await loadCommissionOverview();
 }
 window.loadAdminData = loadAdminData;
 
@@ -97,14 +99,17 @@ function renderModels(models) {
     const canPromote = m.status === 'services_selected';
     return `<tr>
       <td><div>${m.legalName || m.displayName || '—'}</div><div class="text-xs text-muted">${m.email}</div></td>
-      <td>${badge(m.status)}</td>
+      <td>${badge(m.status)} ${m.banned ? badge('banned') : ''}</td>
       <td>${m.stageName || '—'}</td>
       <td>${fmtDate(m.createdAt)}</td>
       <td>${docs}</td>
       <td>
-        <div class="flex gap-1">
+        <div class="flex gap-1" style="flex-wrap:wrap">
           <button class="btn btn-ghost btn-sm" onclick="openModelDetail('${m.id}')">View</button>
           ${canPromote ? `<button class="btn btn-gold btn-sm" onclick="promoteModel('${m.id}')">Promote to Contract</button>` : ''}
+          ${m.banned
+            ? `<button class="btn btn-ghost btn-sm" onclick="unbanModel('${m.id}')">Unban</button>`
+            : `<button class="btn btn-danger btn-sm" onclick="banModel('${m.id}')">Ban</button>`}
           <button class="btn btn-danger btn-sm" onclick="deleteModel('${m.id}')">Delete</button>
         </div>
       </td>
@@ -346,4 +351,96 @@ window.adminNav = (btn, id) => {
   document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById(id).classList.add('active');
+  if (id === 'a-commission') { loadCommissionSettings(); loadCommissionOverview(); }
 };
+
+/* ════════════════════════════════════════════════════════════════════
+   BAN / UNBAN — for unpaid commission (or other violations)
+   ════════════════════════════════════════════════════════════════════ */
+window.banModel = async (id) => {
+  const reason = prompt('Reason for ban (shown internally only):', 'Unpaid commission past deadline');
+  if (reason === null) return;
+  await updateDoc(doc(db, 'models', id), { banned: true, banReason: reason, bannedAt: serverTimestamp() });
+  await addDoc(collection(db, 'notifications'), {
+    userId: id, message: 'Your account has been suspended. Please contact support.', read: false, createdAt: serverTimestamp()
+  });
+  toast('Model banned', 'success');
+  loadAllModels();
+  loadCommissionOverview();
+};
+
+window.unbanModel = async (id) => {
+  await updateDoc(doc(db, 'models', id), { banned: false, banReason: null });
+  await addDoc(collection(db, 'notifications'), {
+    userId: id, message: 'Your account suspension has been lifted. Welcome back!', read: false, createdAt: serverTimestamp()
+  });
+  toast('Model unbanned', 'success');
+  loadAllModels();
+  loadCommissionOverview();
+};
+
+/* ════════════════════════════════════════════════════════════════════
+   COMMISSION SETTINGS & OVERVIEW
+   ════════════════════════════════════════════════════════════════════ */
+async function loadCommissionSettings() {
+  const snap = await getDoc(doc(db, 'settings', 'commission'));
+  const d = snap.exists() ? snap.data() : { ratePercent: 15, paymentDeadlineDays: 7 };
+  const rateEl = document.getElementById('commission-rate-input');
+  const daysEl = document.getElementById('commission-days-input');
+  if (rateEl) rateEl.value = d.ratePercent ?? 15;
+  if (daysEl) daysEl.value = d.paymentDeadlineDays ?? 7;
+}
+
+window.saveCommissionSettings = async () => {
+  const ratePercent = parseFloat(v('commission-rate-input'));
+  const paymentDeadlineDays = parseInt(v('commission-days-input'), 10);
+  if (isNaN(ratePercent) || ratePercent < 0 || ratePercent > 100) return toast('Enter a valid commission %', 'error');
+  if (isNaN(paymentDeadlineDays) || paymentDeadlineDays < 1) return toast('Enter a valid deadline (days)', 'error');
+  await setDoc(doc(db, 'settings', 'commission'), { ratePercent, paymentDeadlineDays, updatedAt: serverTimestamp() }, { merge: true });
+  toast('Commission settings saved', 'success');
+};
+
+async function loadCommissionOverview() {
+  const tbody = document.getElementById('commission-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="5"><div class="loader"></div></td></tr>';
+
+  const settingsSnap = await getDoc(doc(db, 'settings', 'commission'));
+  const settings = settingsSnap.exists() ? settingsSnap.data() : { ratePercent: 15, paymentDeadlineDays: 7 };
+
+  const modelsSnap = await getDocs(query(collection(db, 'models'), where('commissionOwed', '>', 0)));
+  if (modelsSnap.empty) {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center">No outstanding commission</td></tr>';
+    return;
+  }
+
+  const rows = [];
+  for (const mDoc of modelsSnap.docs) {
+    const m = mDoc.data();
+    // Find oldest unpaid commission item for this model to determine due date
+    const reqSnap = await getDocs(query(
+      collection(db, 'serviceRequests'),
+      where('modelId', '==', mDoc.id),
+      where('commissionPaid', '==', false)
+    ));
+    let oldest = null;
+    reqSnap.forEach(r => {
+      const data = r.data();
+      if (!data.paymentReportedAt) return;
+      if (!oldest || data.paymentReportedAt.toMillis?.() < oldest.toMillis?.()) oldest = data.paymentReportedAt;
+    });
+    const overdue = oldest ? isOverdue(oldest, settings.paymentDeadlineDays) : false;
+    rows.push(`<tr>
+      <td>${m.stageName || m.legalName || m.email}</td>
+      <td>$${(m.commissionOwed || 0).toFixed(2)}</td>
+      <td>${oldest ? dueDate(oldest, settings.paymentDeadlineDays) : '—'}</td>
+      <td>${overdue ? badge('commission_overdue') : badge('commission_owed')} ${m.banned ? badge('banned') : ''}</td>
+      <td>
+        ${m.banned
+          ? `<button class="btn btn-ghost btn-sm" onclick="unbanModel('${mDoc.id}')">Unban</button>`
+          : `<button class="btn btn-danger btn-sm" onclick="banModel('${mDoc.id}')">Ban${overdue ? ' (Overdue)' : ''}</button>`}
+      </td>
+    </tr>`);
+  }
+  tbody.innerHTML = rows.join('');
+}
