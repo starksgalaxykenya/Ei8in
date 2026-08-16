@@ -271,6 +271,10 @@
       <button class="tab" onclick="dashTab(this,'d-services')">My Services</button>
       <button class="tab" onclick="dashTab(this,'d-media')">My Media</button>
       <button class="tab" onclick="dashTab(this,'d-profile')">Profile</button>
+      <button class="tab" onclick="dashTab(this,'d-content')">Content Studio</button>
+      <button class="tab" onclick="dashTab(this,'d-requests')">Service Requests</button>
+      <button class="tab" onclick="dashTab(this,'d-subscribers')">Subscribers</button>
+      <button class="tab" onclick="dashTab(this,'d-commission')">Commission</button>
       <button class="tab" onclick="dashTab(this,'d-notifs')">Notifications <span id="notif-badge" class="badge badge-red hidden" style="margin-left:4px;vertical-align:middle"></span></button>
       <button class="tab" onclick="dashTab(this,'d-messages')">Messages <span id="msg-badge" class="badge badge-red hidden" style="margin-left:4px;vertical-align:middle"></span></button>
     </div>
@@ -282,6 +286,12 @@
         <div class="alert alert-info flex items-center justify-between gap-2 mb-4" style="flex-wrap:wrap">
           <div><strong class="gold">🎉 Your contract is ready!</strong><p class="text-sm mt-1">Ei8-In Studios has approved your application. Sign to complete your onboarding.</p></div>
           <button onclick="goContractStep()" class="btn btn-gold btn-sm">Sign Now →</button>
+        </div>
+      </div>
+      <div id="d-commission-prompt" class="hidden">
+        <div class="alert alert-error flex items-center justify-between gap-2 mb-4" style="flex-wrap:wrap">
+          <div><strong style="color:#f87171">⚠ Commission owed: <span id="d-commission-prompt-amt">$0.00</span></strong><p class="text-sm mt-1">Pay within <span id="d-commission-prompt-days">7</span> days of the report to avoid suspension.</p></div>
+          <button onclick="dashTab(document.querySelector('[onclick*=d-commission]'),'d-commission')" class="btn btn-gold btn-sm">Go to Commission →</button>
         </div>
       </div>
       <div class="grid-4 mb-4">
@@ -367,6 +377,82 @@
   </div>
 </div>
 
+    <!-- Content Studio -->
+    <div id="d-content" class="tab-content">
+      <div class="sec-header"><div><h2 class="sec-title">Content Studio</h2><p class="sec-sub">Manage your public Feed and subscriber-only Super Fun content</p></div></div>
+      <div class="tabs mb-4">
+        <button class="cs-subtab tab active" onclick="csTab(this,'feed')">Feed (Public)</button>
+        <button class="cs-subtab tab" onclick="csTab(this,'superfun')">Super Fun (Subscribers Only)</button>
+      </div>
+
+      <!-- FEED PANEL -->
+      <div id="cs-panel-feed" class="cs-panel">
+        <div class="card-gold p-4 mb-3">
+          <p class="label mb-2">New Feed Post</p>
+          <div class="input-group"><textarea id="content-caption-feed" placeholder="Write a caption..." rows="2"></textarea></div>
+          <input type="file" id="content-file-feed" accept="image/*,video/*" class="mb-2">
+          <button class="btn btn-gold" onclick="publishPost('feed')">Publish Post</button>
+        </div>
+        <div class="card p-3 mb-3">
+          <p class="label mb-2">New Story <span class="text-xs text-muted" style="text-transform:none;letter-spacing:0">(live 24 hours)</span></p>
+          <input type="file" id="content-story-file-feed" accept="image/*,video/*" class="mb-2">
+          <button class="btn btn-ghost" onclick="publishStory('feed')">Add Story</button>
+          <div id="cs-stories-feed" class="ph-stories-row mt-3"><div class="loader"></div></div>
+        </div>
+        <p class="label mb-2">Your Feed Posts</p>
+        <div id="cs-posts-feed" class="media-grid"><div class="loader"></div></div>
+      </div>
+
+      <!-- SUPER FUN PANEL -->
+      <div id="cs-panel-superfun" class="cs-panel hidden">
+        <div class="card-gold p-4 mb-3">
+          <label class="checkbox-label mb-3">
+            <input type="checkbox" id="superfun-enabled" onchange="toggleSuperFun(this.checked)">
+            <span>Enable my Super Fun profile — visible only to fans I approve as subscribers</span>
+          </label>
+          <div class="input-group"><label class="input-label">Super Fun Bio (max 500 chars)</label><textarea id="superfun-bio" rows="3" placeholder="Tell subscribers what makes this exclusive..."></textarea></div>
+          <button class="btn btn-ghost btn-sm" onclick="saveSuperFunBio()">Save Bio</button>
+        </div>
+        <div class="card-gold p-4 mb-3">
+          <p class="label mb-2">New Super Fun Post</p>
+          <div class="input-group"><textarea id="content-caption-superfun" placeholder="Write a caption..." rows="2"></textarea></div>
+          <input type="file" id="content-file-superfun" accept="image/*,video/*" class="mb-2">
+          <button class="btn btn-gold" onclick="publishPost('superfun')">Publish Post</button>
+        </div>
+        <div class="card p-3 mb-3">
+          <p class="label mb-2">New Story <span class="text-xs text-muted" style="text-transform:none;letter-spacing:0">(live 24 hours)</span></p>
+          <input type="file" id="content-story-file-superfun" accept="image/*,video/*" class="mb-2">
+          <button class="btn btn-ghost" onclick="publishStory('superfun')">Add Story</button>
+          <div id="cs-stories-superfun" class="ph-stories-row mt-3"><div class="loader"></div></div>
+        </div>
+        <p class="label mb-2">Your Super Fun Posts</p>
+        <div id="cs-posts-superfun" class="media-grid"><div class="loader"></div></div>
+      </div>
+    </div>
+
+    <!-- Service Requests -->
+    <div id="d-requests" class="tab-content">
+      <div class="sec-header"><div><h2 class="sec-title">Service Requests</h2><p class="sec-sub">Accept or decline requests from fans, then chat to agree on details</p></div></div>
+      <div id="svc-requests-list" class="space-y"><div class="loader"></div></div>
+    </div>
+
+    <!-- Subscribers -->
+    <div id="d-subscribers" class="tab-content">
+      <div class="sec-header"><div><h2 class="sec-title">Subscribers</h2><p class="sec-sub">Approve fan access to your Super Fun profile once payment is confirmed off-platform</p></div></div>
+      <div id="subscribers-list" class="space-y"><div class="loader"></div></div>
+    </div>
+
+    <!-- Commission -->
+    <div id="d-commission" class="tab-content">
+      <div class="sec-header"><div><h2 class="sec-title">Commission</h2><p class="sec-sub">Platform commission owed from services you've been paid for</p></div></div>
+      <div class="stat-card mb-4" style="max-width:260px">
+        <div class="stat-value" id="commission-owed-total">$0.00</div>
+        <div class="stat-label">Total Owed</div>
+      </div>
+      <div class="alert alert-info mb-3" style="font-size:.8rem">Commission is calculated automatically when you report a payment received from a fan. Pay it within the deadline set by Ei8-In Studios to avoid account suspension.</div>
+      <div id="commission-list" class="space-y"><div class="loader"></div></div>
+    </div>
+
     <!-- Notifications -->
     <div id="d-notifs" class="tab-content">
       <div class="sec-header"><div><h2 class="sec-title">Notifications</h2><p class="sec-sub">Messages from Ei8-In Studios</p></div></div>
@@ -439,6 +525,8 @@
       <div class="sb-section">Content</div>
       <button class="sb-link" onclick="adminNav(this,'a-clauses')">📄 Clause Editor</button>
       <button class="sb-link" onclick="adminNav(this,'a-services')">🛍 Services</button>
+      <div class="sb-section">Finance</div>
+      <button class="sb-link" onclick="adminNav(this,'a-commission')">💰 Commission</button>
       <div class="sb-section">Communication</div>
       <button class="sb-link" onclick="adminNav(this,'a-notifs')">🔔 Notifications</button>
     </aside>
@@ -510,6 +598,26 @@
         </div>
       </section>
 
+      <!-- COMMISSION -->
+      <section id="a-commission" class="admin-section">
+        <div class="sec-header"><div><h2 class="sec-title">Commission</h2><p class="sec-sub">Set platform commission rate and manage overdue accounts</p></div></div>
+        <div class="card-gold p-4 mb-4">
+          <p class="label mb-2">Global Settings</p>
+          <div class="grid-2">
+            <div class="input-group"><label class="input-label">Commission Rate (%)</label><input type="number" id="commission-rate-input" min="0" max="100" step="0.5" placeholder="15"></div>
+            <div class="input-group"><label class="input-label">Payment Deadline (days)</label><input type="number" id="commission-days-input" min="1" step="1" placeholder="7"></div>
+          </div>
+          <button onclick="saveCommissionSettings()" class="btn btn-gold">Save Settings</button>
+        </div>
+        <div class="sec-header"><div><h3 class="sec-title" style="font-size:1.3rem">Outstanding Commission</h3><p class="sec-sub">Models with unpaid commission — ban those overdue past the deadline</p></div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Model</th><th>Owed</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="commission-tbody"><tr><td colspan="5"><div class="loader"></div></td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
       <!-- NOTIFICATIONS -->
       <section id="a-notifs" class="admin-section">
         <div class="sec-header"><div><h2 class="sec-title">Send Notification</h2><p class="sec-sub">Message models directly</p></div></div>
@@ -576,25 +684,37 @@
     </div>
   </nav>
   <div class="container" style="padding-top:2rem;padding-bottom:3rem">
-    <div class="ph-discover-header">
-      <div>
-        <h2 class="sec-title">Discover</h2>
-        <p class="sec-sub">Browse our exclusive talent roster</p>
+    <div class="tabs mb-4">
+      <button class="tab active" onclick="phDashTab(this,'ph-tab-discover')">Discover</button>
+      <button class="tab" onclick="phDashTab(this,'ph-tab-requests')">My Requests</button>
+    </div>
+
+    <div id="ph-tab-discover" class="tab-content active">
+      <div class="ph-discover-header">
+        <div>
+          <h2 class="sec-title">Discover</h2>
+          <p class="sec-sub">Browse our exclusive talent roster</p>
+        </div>
+      </div>
+
+      <!-- Search bar -->
+      <div class="ph-search-wrap">
+        <span class="ph-search-icon">🔍</span>
+        <input type="text" id="ph-search" class="ph-search-input" placeholder="Search by name or bio…" oninput="phSearch()">
+      </div>
+
+      <!-- Service filter chips -->
+      <div id="ph-service-filters" class="ph-chips-row"></div>
+
+      <!-- Model grid -->
+      <div id="pleasure-models-grid" class="ph-models-grid">
+        <div class="loader"></div>
       </div>
     </div>
 
-    <!-- Search bar -->
-    <div class="ph-search-wrap">
-      <span class="ph-search-icon">🔍</span>
-      <input type="text" id="ph-search" class="ph-search-input" placeholder="Search by name or bio…" oninput="phSearch()">
-    </div>
-
-    <!-- Service filter chips -->
-    <div id="ph-service-filters" class="ph-chips-row"></div>
-
-    <!-- Model grid -->
-    <div id="pleasure-models-grid" class="ph-models-grid">
-      <div class="loader"></div>
+    <div id="ph-tab-requests" class="tab-content">
+      <div class="sec-header"><div><h2 class="sec-title">My Service Requests</h2><p class="sec-sub">Track requests you've sent to models</p></div></div>
+      <div id="ph-my-requests-list" class="space-y"><div class="loader"></div></div>
     </div>
   </div>
 
@@ -637,6 +757,24 @@
     <div id="mm-body"><div class="loader"></div></div>
     <div class="divider"></div>
     <div><p class="label mb-2">Uploaded Media</p><div id="admin-media-list" class="media-grid"></div></div>
+  </div>
+</div>
+
+<!-- ================================================================== -->
+<!-- REQUEST SERVICE MODAL (fan side)                                    -->
+<!-- ================================================================== -->
+<div id="req-svc-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeRequestServiceModal()">
+  <div class="modal">
+    <div class="flex justify-between items-center mb-3">
+      <h2 style="font-size:1.4rem" id="req-svc-title">Request a Service</h2>
+      <button onclick="closeRequestServiceModal()" class="btn btn-ghost btn-sm">✕</button>
+    </div>
+    <input type="hidden" id="req-svc-model-id">
+    <input type="hidden" id="req-svc-model-name">
+    <div class="input-group"><label class="input-label">Service</label><select id="req-svc-select"></select></div>
+    <div class="input-group"><label class="input-label">Message (optional)</label><textarea id="req-svc-message" placeholder="Tell them what you're looking for..." rows="3"></textarea></div>
+    <button class="btn btn-gold btn-full" onclick="submitServiceRequest()">Send Request</button>
+    <p class="text-xs text-muted mt-2">The model will accept or decline your request. Once accepted, you'll be able to chat and agree on details. Payment happens off-platform, directly with the model.</p>
   </div>
 </div>
 
