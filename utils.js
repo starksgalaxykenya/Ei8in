@@ -54,10 +54,47 @@ export function badge(status) {
     services_selected: ['badge-gold',    'Awaiting Contract'],
     contract_ready:    ['badge-purple',  'Contract Ready'],
     contracted:        ['badge-green',   'Contracted'],
-    active:            ['badge-green',   'Active']
+    active:            ['badge-green',   'Active'],
+    banned:            ['badge-red',     'Banned'],
+    // service request statuses
+    request_pending:   ['badge-gold',    'Pending'],
+    request_accepted:  ['badge-blue',    'Accepted'],
+    request_rejected:  ['badge-red',     'Declined'],
+    request_paid:      ['badge-green',   'Paid'],
+    request_completed: ['badge-green',   'Completed'],
+    // commission statuses
+    commission_owed:    ['badge-gold',   'Owed'],
+    commission_overdue: ['badge-red',    'Overdue'],
+    commission_paid:    ['badge-green',  'Paid']
   };
   const [c, l] = map[status] || ['badge-muted', status || '—'];
   return `<span class="badge ${c}">${l}</span>`;
+}
+
+// ── COMMISSION HELPERS ─────────────────────────────────────────────────
+export function calcCommission(amount, ratePercent) {
+  const rate = Number(ratePercent) || 0;
+  const amt  = Number(amount) || 0;
+  return Math.round((amt * rate / 100) * 100) / 100;
+}
+
+// Returns true if a commission logged at `reportedAt` is now overdue given deadlineDays
+export function isOverdue(reportedAt, deadlineDays) {
+  if (!reportedAt) return false;
+  try {
+    const reported = reportedAt.toDate ? reportedAt.toDate() : new Date(reportedAt);
+    const due = new Date(reported.getTime() + (Number(deadlineDays) || 7) * 86400000);
+    return Date.now() > due.getTime();
+  } catch (e) { return false; }
+}
+
+export function dueDate(reportedAt, deadlineDays) {
+  if (!reportedAt) return '—';
+  try {
+    const reported = reportedAt.toDate ? reportedAt.toDate() : new Date(reportedAt);
+    const due = new Date(reported.getTime() + (Number(deadlineDays) || 7) * 86400000);
+    return due.toLocaleDateString();
+  } catch (e) { return '—'; }
 }
 
 // ── SET TEXT CONTENT SAFELY ───────────────────────────────────────────
