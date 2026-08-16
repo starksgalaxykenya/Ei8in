@@ -10,7 +10,7 @@ import {
 import {
   doc, getDoc, setDoc, updateDoc, deleteDoc,
   collection, addDoc, getDocs,
-  query, orderBy, where, serverTimestamp
+  query, orderBy, where, serverTimestamp, increment
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 import {
@@ -22,7 +22,8 @@ import { loadModelInbox } from './pleasurehub.js';
 import { state }                        from './state.js';
 import {
   showView, toast, v, fmtDate, badge,
-  showStep, initSig, uploadSig, fetchClauses
+  showStep, initSig, uploadSig, fetchClauses,
+  isOverdue, dueDate
 } from './utils.js';
 
 // ── AUTH TAB SWITCH ───────────────────────────────────────────────────
@@ -96,6 +97,13 @@ export async function loadModelDoc(uid) {
 
 // ── ROUTING (exported for main.js) ───────────────────────────────────
 export function routeModel() {
+  if (state.modelData?.banned) {
+    signOut(auth);
+    state.modelData = null;
+    toast('Your account has been suspended for unpaid commission. Contact support.', 'error');
+    showView('view-model-auth');
+    return;
+  }
   if (!state.modelData) {
     showView('view-onboarding');
     fetchClauses();
@@ -285,8 +293,16 @@ window.goContractStep = () => {
 };
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────
+async function fetchCommissionSettings() {
+  try {
+    const snap = await getDoc(doc(db, 'settings', 'commission'));
+    if (snap.exists()) state.commissionSettings = { ratePercent: 15, paymentDeadlineDays: 7, ...snap.data() };
+  } catch (e) { console.error(e); }
+}
+
 async function loadDashboard() {
   if (!state.modelData) return;
+  await fetchCommissionSettings();
   document.getElementById('d-stat-status').innerHTML = badge(state.modelData.status);
   let docs = 0;
   if (state.modelData.agreementSignedAt) docs++;
@@ -298,6 +314,19 @@ async function loadDashboard() {
   document.getElementById('d-stat-joined').textContent  = fmtDate(state.modelData.createdAt);
   if (state.modelData.status === 'contract_ready')
     document.getElementById('d-contract-prompt')?.classList.remove('hidden');
+
+  const owed = state.modelData.commissionOwed || 0;
+  const commissionAlert = document.getElementById('d-commission-prompt');
+  if (commissionAlert) {
+    if (owed > 0) {
+      commissionAlert.classList.remove('hidden');
+      const rate = state.commissionSettings.paymentDeadlineDays || 7;
+      document.getElementById('d-commission-prompt-amt').textContent = `$${owed.toFixed(2)}`;
+      document.getElementById('d-commission-prompt-days').textContent = rate;
+    } else {
+      commissionAlert.classList.add('hidden');
+    }
+  }
 
   const order  = ['pending','agreement_signed','consent_signed','nda_signed','services_selected','contract_ready','contracted'];
   const idx    = order.indexOf(state.modelData.status);
@@ -396,6 +425,10 @@ window.dashTab = (btn, id) => {
   if (id === 'd-notifs')   loadModelNotifs();
   if (id === 'd-media')    loadMedia();
   if (id === 'd-messages') loadModelInbox();
+  if (id === 'd-content')  loadContentStudio();
+  if (id === 'd-requests') loadModelServiceRequests();
+  if (id === 'd-commission') loadCommissionTab();
+  if (id === 'd-subscribers') loadSubscriberRequests();
 };
 
 // ── MEDIA UPLOAD & MANAGEMENT ─────────────────────────────────────────
@@ -557,3 +590,394 @@ async function loadGalleryPreview() {
     el.innerHTML += `<div class="ph-gallery__item" style="background:var(--sfrr);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--gold)">+${images.length - 8} more</div>`;
   }
 }
+
+// ── ESCAPE HTML ────────────────────────────────────────────────────────
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>"']/g, m => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[m]));
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   CONTENT STUDIO — public "Feed" and subscriber-only "Super Fun" posts/stories
+   ════════════════════════════════════════════════════════════════════ */
+window.csTab = (btn, type) => {
+  state.contentTab = type;
+  document.querySelectorAll('#d-content .cs-subtab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#d-content .cs-panel').forEach(p => p.classList.add('hidden'));
+  document.getElementById(`cs-panel-${type}`)?.classList.remove('hidden');
+};
+
+async function loadContentStudio() {
+  if (!state.currentUser) return;
+
+  // Super Fun toggle + bio
+  const chk = document.getElementById('superfun-enabled');
+  const bio = document.getElementById('superfun-bio');
+  if (chk) chk.checked = !!state.modelData?.superFunEnabled;
+  if (bio) bio.value   = state.modelData?.superFunBio || '';
+
+  await Promise.all([
+    loadPosts('feed'), loadPosts('superfun'),
+    loadStories('feed'), loadStories('superfun')
+  ]);
+}
+
+window.toggleSuperFun = async (checked) => {
+  await updateDoc(doc(db, 'models', state.currentUser.uid), { superFunEnabled: checked });
+  state.modelData.superFunEnabled = checked;
+  toast(checked ? 'Super Fun profile enabled' : 'Super Fun profile disabled', 'success');
+};
+
+window.saveSuperFunBio = async () => {
+  const val = document.getElementById('superfun-bio')?.value || '';
+  if (val.length > 500) return toast('Bio must be 500 characters or less', 'error');
+  await updateDoc(doc(db, 'models', state.currentUser.uid), { superFunBio: val });
+  state.modelData.superFunBio = val;
+  toast('Super Fun bio saved', 'success');
+};
+
+// ── POSTS ────────────────────────────────────────────────────────────
+window.publishPost = async (type) => {
+  const capEl  = document.getElementById(`content-caption-${type}`);
+  const fileEl = document.getElementById(`content-file-${type}`);
+  const file   = fileEl?.files?.[0];
+  const caption = capEl?.value?.trim() || '';
+  if (!file) return toast('Choose an image or video to post', 'error');
+
+  const storagePath = `posts/${type}/${state.currentUser.uid}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+  const sRef = ref(storage, storagePath);
+  const task = uploadBytesResumable(sRef, file);
+  toast('Uploading post…', 'info');
+  task.on('state_changed', null,
+    (err) => toast('Upload failed: ' + err.message, 'error'),
+    async () => {
+      const url = await getDownloadURL(task.snapshot.ref);
+      await addDoc(collection(db, 'posts'), {
+        modelId: state.currentUser.uid,
+        type,
+        caption,
+        mediaUrl: url,
+        mediaType: file.type,
+        storagePath,
+        createdAt: serverTimestamp()
+      });
+      if (capEl) capEl.value = '';
+      if (fileEl) fileEl.value = '';
+      toast('Post published', 'success');
+      loadPosts(type);
+    }
+  );
+};
+
+async function loadPosts(type) {
+  const grid = document.getElementById(`cs-posts-${type}`);
+  if (!grid || !state.currentUser) return;
+  const snap = await getDocs(query(
+    collection(db, 'posts'),
+    where('modelId', '==', state.currentUser.uid),
+    where('type', '==', type),
+    orderBy('createdAt', 'desc')
+  ));
+  if (snap.empty) { grid.innerHTML = '<p class="text-muted text-sm">No posts yet.</p>'; return; }
+  grid.innerHTML = snap.docs.map(d => {
+    const p = d.data();
+    const isVideo = (p.mediaType || '').startsWith('video/');
+    return `<div class="media-card">
+      <div class="media-preview" style="background:#000;display:flex;align-items:center;justify-content:center">
+        ${isVideo ? `<video src="${p.mediaUrl}" controls style="width:100%;height:100%;object-fit:cover"></video>`
+                  : `<img src="${p.mediaUrl}" style="width:100%;height:100%;object-fit:cover">`}
+      </div>
+      <div class="media-info">${escHtml(p.caption || '').slice(0,80)}</div>
+      <div class="media-actions"><button class="btn btn-danger btn-sm" onclick="deletePostItem('${d.id}','${p.storagePath || ''}')">Delete</button></div>
+    </div>`;
+  }).join('');
+}
+
+window.deletePostItem = async (id, storagePath) => {
+  if (!confirm('Delete this post permanently?')) return;
+  if (storagePath) { try { await deleteObject(ref(storage, storagePath)); } catch (e) { console.warn(e); } }
+  await deleteDoc(doc(db, 'posts', id));
+  toast('Post deleted', 'info');
+  loadPosts(state.contentTab);
+  loadPosts('feed'); loadPosts('superfun');
+};
+
+// ── STORIES (24h) ───────────────────────────────────────────────────
+window.publishStory = async (type) => {
+  const fileEl = document.getElementById(`content-story-file-${type}`);
+  const file   = fileEl?.files?.[0];
+  if (!file) return toast('Choose an image or video for your story', 'error');
+
+  const storagePath = `stories/${type}/${state.currentUser.uid}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+  const sRef = ref(storage, storagePath);
+  const task = uploadBytesResumable(sRef, file);
+  toast('Uploading story…', 'info');
+  task.on('state_changed', null,
+    (err) => toast('Upload failed: ' + err.message, 'error'),
+    async () => {
+      const url = await getDownloadURL(task.snapshot.ref);
+      await addDoc(collection(db, 'stories'), {
+        modelId: state.currentUser.uid,
+        type,
+        mediaUrl: url,
+        mediaType: file.type,
+        storagePath,
+        createdAt: serverTimestamp(),
+        expiresAt: new Date(Date.now() + 24 * 3600 * 1000)
+      });
+      if (fileEl) fileEl.value = '';
+      toast('Story added — live for 24 hours', 'success');
+      loadStories(type);
+    }
+  );
+};
+
+async function loadStories(type) {
+  const row = document.getElementById(`cs-stories-${type}`);
+  if (!row || !state.currentUser) return;
+  const snap = await getDocs(query(
+    collection(db, 'stories'),
+    where('modelId', '==', state.currentUser.uid),
+    where('type', '==', type),
+    orderBy('createdAt', 'desc')
+  ));
+  const now = Date.now();
+  const live = [];
+  snap.forEach(d => {
+    const s = d.data();
+    const exp = s.expiresAt?.toDate ? s.expiresAt.toDate().getTime() : new Date(s.expiresAt).getTime();
+    if (exp > now) live.push({ id: d.id, ...s });
+  });
+  if (!live.length) { row.innerHTML = '<p class="text-muted text-sm">No active stories.</p>'; return; }
+  row.innerHTML = live.map(s => {
+    const isVideo = (s.mediaType || '').startsWith('video/');
+    return `<div class="story-thumb">
+      ${isVideo ? `<video src="${s.mediaUrl}" style="width:100%;height:100%;object-fit:cover"></video>`
+                : `<img src="${s.mediaUrl}" style="width:100%;height:100%;object-fit:cover">`}
+      <button class="story-thumb__del" onclick="deleteStoryItem('${s.id}','${s.storagePath || ''}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+window.deleteStoryItem = async (id, storagePath) => {
+  if (storagePath) { try { await deleteObject(ref(storage, storagePath)); } catch (e) { console.warn(e); } }
+  await deleteDoc(doc(db, 'stories', id));
+  loadStories('feed'); loadStories('superfun');
+};
+
+/* ════════════════════════════════════════════════════════════════════
+   SERVICE REQUESTS — fan requests a service, model accepts/rejects,
+   agrees on price in chat, then self-reports payment received.
+   ════════════════════════════════════════════════════════════════════ */
+async function loadModelServiceRequests() {
+  if (!state.currentUser) return;
+  const list = document.getElementById('svc-requests-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loader"></div>';
+
+  const snap = await getDocs(query(
+    collection(db, 'serviceRequests'),
+    where('modelId', '==', state.currentUser.uid),
+    orderBy('createdAt', 'desc')
+  ));
+
+  if (snap.empty) { list.innerHTML = '<p class="text-muted">No service requests yet.</p>'; return; }
+
+  list.innerHTML = snap.docs.map(d => {
+    const r = d.data();
+    const paid = r.paymentReportedAt;
+    let actions = '';
+    if (r.status === 'pending') {
+      actions = `<button class="btn btn-gold btn-sm" onclick="acceptServiceRequest('${d.id}')">Accept</button>
+                  <button class="btn btn-danger btn-sm" onclick="rejectServiceRequest('${d.id}')">Decline</button>`;
+    } else if (r.status === 'accepted' && !paid) {
+      actions = `<button class="btn btn-ghost btn-sm" onclick="openServiceChat('${d.id}','${escHtml(r.fanName)}','${r.conversationId}')">Open Chat</button>
+                 <div class="flex gap-1 mt-1">
+                   <input type="number" min="0" step="0.01" id="pay-amt-${d.id}" placeholder="Amount received" style="max-width:150px">
+                   <button class="btn btn-gold btn-sm" onclick="reportPayment('${d.id}')">Report Payment</button>
+                 </div>`;
+    } else if (paid) {
+      actions = `<button class="btn btn-ghost btn-sm" onclick="openServiceChat('${d.id}','${escHtml(r.fanName)}','${r.conversationId}')">Open Chat</button>
+                 <span class="text-xs text-muted">Reported $${(r.amount || 0).toFixed(2)} · commission $${(r.commissionAmount || 0).toFixed(2)} ${r.commissionPaid ? '(paid)' : '(owed)'}</span>`;
+    } else {
+      actions = `<span class="text-xs text-muted">Declined</span>`;
+    }
+    return `<div class="card flex justify-between items-center" style="flex-wrap:wrap;gap:.75rem">
+      <div>
+        <div><strong>${escHtml(r.fanName || 'Fan')}</strong> requested <strong class="gold">${escHtml(r.serviceName || 'a service')}</strong></div>
+        ${r.message ? `<div class="text-xs text-muted mt-1">"${escHtml(r.message)}"</div>` : ''}
+        <div class="text-xs text-muted mt-1">${badge('request_' + r.status)}</div>
+      </div>
+      <div>${actions}</div>
+    </div>`;
+  }).join('');
+}
+
+window.acceptServiceRequest = async (id) => {
+  const snap = await getDoc(doc(db, 'serviceRequests', id));
+  if (!snap.exists()) return;
+  const r = snap.data();
+  const conversationId = `svc_${id}`;
+  await setDoc(doc(db, 'conversations', conversationId), {
+    fanId: r.fanId, modelId: r.modelId,
+    fanName: r.fanName, modelName: state.modelData.stageName,
+    type: 'service', serviceRequestId: id,
+    createdAt: serverTimestamp(), lastMessage: '', lastAt: serverTimestamp()
+  }, { merge: true });
+  await updateDoc(doc(db, 'serviceRequests', id), {
+    status: 'accepted', respondedAt: serverTimestamp(), conversationId
+  });
+  await addDoc(collection(db, 'notifications'), {
+    userId: r.fanId, message: `${state.modelData.stageName} accepted your request for ${r.serviceName}. Open your chat!`,
+    read: false, createdAt: serverTimestamp()
+  });
+  toast('Request accepted', 'success');
+  loadModelServiceRequests();
+};
+
+window.rejectServiceRequest = async (id) => {
+  const snap = await getDoc(doc(db, 'serviceRequests', id));
+  if (!snap.exists()) return;
+  const r = snap.data();
+  await updateDoc(doc(db, 'serviceRequests', id), { status: 'rejected', respondedAt: serverTimestamp() });
+  await addDoc(collection(db, 'notifications'), {
+    userId: r.fanId, message: `${state.modelData.stageName} declined your request for ${r.serviceName}.`,
+    read: false, createdAt: serverTimestamp()
+  });
+  toast('Request declined', 'info');
+  loadModelServiceRequests();
+};
+
+window.openServiceChat = (id, fanName, conversationId) => {
+  // Switch to Messages tab, then open the service-scoped conversation thread
+  document.querySelectorAll('#view-model-dashboard .tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#view-model-dashboard .tab-content').forEach(t => t.classList.remove('active'));
+  const msgsTabBtn = [...document.querySelectorAll('#view-model-dashboard .tab')].find(t => t.textContent.includes('Messages'));
+  msgsTabBtn?.classList.add('active');
+  document.getElementById('d-messages')?.classList.add('active');
+  loadModelInbox();
+  window.openModelChat(conversationId, fanName);
+};
+
+window.reportPayment = async (id) => {
+  const input = document.getElementById(`pay-amt-${id}`);
+  const amount = parseFloat(input?.value);
+  if (!amount || amount <= 0) return toast('Enter a valid amount received', 'error');
+
+  const commissionAmount = Math.round((amount * (state.commissionSettings.ratePercent || 0) / 100) * 100) / 100;
+
+  await updateDoc(doc(db, 'serviceRequests', id), {
+    amount, commissionAmount,
+    paymentReportedAt: serverTimestamp(),
+    commissionPaid: false
+  });
+  await updateDoc(doc(db, 'models', state.currentUser.uid), {
+    commissionOwed: increment(commissionAmount)
+  });
+  state.modelData.commissionOwed = (state.modelData.commissionOwed || 0) + commissionAmount;
+  toast(`Payment reported. You owe $${commissionAmount.toFixed(2)} commission (due in ${state.commissionSettings.paymentDeadlineDays || 7} days).`, 'success');
+  loadModelServiceRequests();
+};
+
+/* ════════════════════════════════════════════════════════════════════
+   COMMISSION TAB — track and self-report commission payments
+   ════════════════════════════════════════════════════════════════════ */
+async function loadCommissionTab() {
+  if (!state.currentUser) return;
+  const owedEl = document.getElementById('commission-owed-total');
+  if (owedEl) owedEl.textContent = `$${(state.modelData.commissionOwed || 0).toFixed(2)}`;
+
+  const list = document.getElementById('commission-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loader"></div>';
+
+  const snap = await getDocs(query(
+    collection(db, 'serviceRequests'),
+    where('modelId', '==', state.currentUser.uid),
+    orderBy('createdAt', 'desc')
+  ));
+
+  const items = snap.docs.filter(d => d.data().paymentReportedAt);
+  if (!items.length) { list.innerHTML = '<p class="text-muted">No commission history yet.</p>'; return; }
+
+  list.innerHTML = items.map(d => {
+    const r = d.data();
+    const overdue = !r.commissionPaid && isOverdue(r.paymentReportedAt, state.commissionSettings.paymentDeadlineDays);
+    const statusKey = r.commissionPaid ? 'commission_paid' : overdue ? 'commission_overdue' : 'commission_owed';
+    return `<div class="card flex justify-between items-center" style="flex-wrap:wrap;gap:.5rem">
+      <div>
+        <div><strong>${escHtml(r.serviceName || 'Service')}</strong> — earned $${(r.amount || 0).toFixed(2)}</div>
+        <div class="text-xs text-muted mt-1">Commission: $${(r.commissionAmount || 0).toFixed(2)} · Due ${dueDate(r.paymentReportedAt, state.commissionSettings.paymentDeadlineDays)}</div>
+        <div class="mt-1">${badge(statusKey)}</div>
+      </div>
+      ${!r.commissionPaid ? `<button class="btn btn-gold btn-sm" onclick="payCommission('${d.id}','${r.commissionAmount || 0}')">I've Paid This</button>` : ''}
+    </div>`;
+  }).join('');
+}
+
+window.payCommission = async (id, amount) => {
+  const amt = parseFloat(amount) || 0;
+  await updateDoc(doc(db, 'serviceRequests', id), { commissionPaid: true, commissionPaidAt: serverTimestamp() });
+  await updateDoc(doc(db, 'models', state.currentUser.uid), { commissionOwed: increment(-amt) });
+  state.modelData.commissionOwed = Math.max(0, (state.modelData.commissionOwed || 0) - amt);
+  toast('Marked as paid. Admin will verify.', 'success');
+  loadCommissionTab();
+  document.getElementById('d-commission-prompt')?.classList.toggle('hidden', state.modelData.commissionOwed <= 0);
+};
+
+/* ════════════════════════════════════════════════════════════════════
+   SUBSCRIBERS — approve/revoke fan access to Super Fun profile
+   ════════════════════════════════════════════════════════════════════ */
+async function loadSubscriberRequests() {
+  if (!state.currentUser) return;
+  const list = document.getElementById('subscribers-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loader"></div>';
+
+  const snap = await getDocs(query(
+    collection(db, 'subscriptions'),
+    where('modelId', '==', state.currentUser.uid),
+    orderBy('requestedAt', 'desc')
+  ));
+
+  if (snap.empty) { list.innerHTML = '<p class="text-muted">No subscriber requests yet.</p>'; return; }
+
+  list.innerHTML = snap.docs.map(d => {
+    const s = d.data();
+    let actions = '';
+    if (s.status === 'pending') {
+      actions = `<button class="btn btn-gold btn-sm" onclick="approveSubscriber('${d.id}')">Approve</button>`;
+    } else if (s.status === 'active') {
+      actions = `<button class="btn btn-danger btn-sm" onclick="revokeSubscriber('${d.id}')">Revoke</button>`;
+    } else {
+      actions = `<span class="text-xs text-muted">Revoked</span>`;
+    }
+    return `<div class="card flex justify-between items-center" style="flex-wrap:wrap;gap:.5rem">
+      <div><strong>${escHtml(s.fanName || 'Fan')}</strong><div class="text-xs text-muted mt-1">${badge(s.status === 'active' ? 'active' : s.status === 'pending' ? 'pending' : 'banned')}</div></div>
+      <div>${actions}</div>
+    </div>`;
+  }).join('');
+}
+
+window.approveSubscriber = async (id) => {
+  const snap = await getDoc(doc(db, 'subscriptions', id));
+  if (!snap.exists()) return;
+  const s = snap.data();
+  await updateDoc(doc(db, 'subscriptions', id), { status: 'active', approvedAt: serverTimestamp() });
+  await addDoc(collection(db, 'notifications'), {
+    userId: s.fanId, message: `${state.modelData.stageName} approved your Super Fun subscription!`,
+    read: false, createdAt: serverTimestamp()
+  });
+  toast('Subscriber approved', 'success');
+  loadSubscriberRequests();
+};
+
+window.revokeSubscriber = async (id) => {
+  if (!confirm('Revoke this subscriber\'s Super Fun access?')) return;
+  await updateDoc(doc(db, 'subscriptions', id), { status: 'revoked', revokedAt: serverTimestamp() });
+  toast('Subscriber revoked', 'info');
+  loadSubscriberRequests();
+};
