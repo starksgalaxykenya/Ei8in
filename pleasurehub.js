@@ -7,6 +7,7 @@ import {
   doc, setDoc, getDoc, collection, getDocs, addDoc,
   query, orderBy, where, onSnapshot, serverTimestamp, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { badge } from './utils.js';
 import { auth, db } from './firebase-config.js';
 import { toast, showView, v } from './utils.js';
 import { state } from './state.js';
@@ -185,9 +186,13 @@ function renderModels(categoryFilter, searchQuery) {
 }
 
 // ── OPEN MODEL PROFILE ────────────────────────────────────────────────
+let currentProfileModel = null;
+let currentSubStatus = null; // null | 'pending' | 'active' | 'revoked'
+
 window.openModelProfile = async (modelId) => {
   const model = allModels.find(m => m.id === modelId);
   if (!model) return;
+  currentProfileModel = model;
 
   // Fetch gallery images for this model from media collection (images only)
   const mediaSnap = await getDocs(query(
@@ -203,9 +208,21 @@ window.openModelProfile = async (modelId) => {
     }
   });
 
-  const svcNames = allServices
-    .filter(s => model.selectedServices?.includes(s.id))
-    .map(s => s.name);
+  // Fetch feed posts/stories (public) and super fun posts/stories (gated)
+  const [feedPosts, superfunPosts, feedStories, superfunStories] = await Promise.all([
+    fetchPosts(modelId, 'feed'), fetchPosts(modelId, 'superfun'),
+    fetchStories(modelId, 'feed'), fetchStories(modelId, 'superfun')
+  ]);
+
+  // Determine subscription status for this fan/model pair
+  currentSubStatus = null;
+  if (state.pleasureUser && model.superFunEnabled) {
+    const subId = `${state.pleasureUser.id}_${modelId}`;
+    const subSnap = await getDoc(doc(db, 'subscriptions', subId));
+    if (subSnap.exists()) currentSubStatus = subSnap.data().status;
+  }
+
+  const svcNames = allServices.filter(s => model.selectedServices?.includes(s.id));
 
   const avatar = model.profilePictureUrl
     ? `<img src="${escapeHtml(model.profilePictureUrl)}" class="ph-profile-avatar" alt="${escapeHtml(model.stageName)}">`
@@ -224,20 +241,132 @@ window.openModelProfile = async (modelId) => {
       ${avatar}
       <div class="ph-profile-info">
         <h2 class="ph-profile-name">${escapeHtml(model.stageName)}</h2>
-        ${svcNames.length ? `<div class="ph-model-card__tags" style="margin-top:.5rem">${svcNames.map(n => `<span class="ph-tag">${escapeHtml(n)}</span>`).join('')}</div>` : ''}
+        ${svcNames.length ? `<div class="ph-model-card__tags" style="margin-top:.5rem">${svcNames.map(s => `<span class="ph-tag">${escapeHtml(s.name)}</span>`).join('')}</div>` : ''}
       </div>
     </div>
     ${model.publicBio ? `<p class="ph-profile-bio">${escapeHtml(model.publicBio)}</p>` : ''}
-    <div class="ph-profile-section-label">Gallery</div>
-    ${galleryHtml}
-    <div class="ph-profile-actions">
-      <button class="btn btn-gold" onclick="startChat('${model.id}', ${JSON.stringify(escapeHtml(model.stageName))})">
-        💬 Message ${escapeHtml(model.stageName)}
-      </button>
+
+    <div class="ph-profile-actions mb-3">
+      <button class="btn btn-gold" onclick="startChat('${model.id}', ${JSON.stringify(escapeHtml(model.stageName))})">💬 Message ${escapeHtml(model.stageName)}</button>
+      ${svcNames.length ? `<button class="btn btn-ghost" onclick="openRequestServiceModal('${model.id}', ${JSON.stringify(escapeHtml(model.stageName))})">📋 Request a Service</button>` : ''}
     </div>
+
+    <div class="tabs mb-3">
+      <button class="tab active" onclick="phProfileTab(this,'ppt-feed')">Feed</button>
+      <button class="tab" onclick="phProfileTab(this,'ppt-stories')">Stories</button>
+      <button class="tab" onclick="phProfileTab(this,'ppt-gallery')">Gallery</button>
+      ${model.superFunEnabled ? `<button class="tab" onclick="phProfileTab(this,'ppt-superfun')">🔒 Super Fun</button>` : ''}
+    </div>
+
+    <div id="ppt-feed" class="tab-content active">
+      ${renderPostsGrid(feedPosts)}
+    </div>
+    <div id="ppt-stories" class="tab-content">
+      ${renderStoriesRow(feedStories)}
+    </div>
+    <div id="ppt-gallery" class="tab-content">
+      ${galleryHtml}
+    </div>
+    ${model.superFunEnabled ? `
+    <div id="ppt-superfun" class="tab-content">
+      ${renderSuperFunSection(model, superfunPosts, superfunStories)}
+    </div>` : ''}
   `;
 
   document.getElementById('ph-profile-modal').classList.remove('hidden');
+};
+
+window.phProfileTab = (btn, id) => {
+  const wrap = document.getElementById('ph-profile-body');
+  wrap.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  wrap.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(id)?.classList.add('active');
+};
+
+// ── POSTS / STORIES FETCH + RENDER ─────────────────────────────────────
+async function fetchPosts(modelId, type) {
+  const snap = await getDocs(query(
+    collection(db, 'posts'), where('modelId', '==', modelId), where('type', '==', type), orderBy('createdAt', 'desc')
+  ));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+async function fetchStories(modelId, type) {
+  const snap = await getDocs(query(
+    collection(db, 'stories'), where('modelId', '==', modelId), where('type', '==', type), orderBy('createdAt', 'desc')
+  ));
+  const now = Date.now();
+  return snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(s => {
+    const exp = s.expiresAt?.toDate ? s.expiresAt.toDate().getTime() : new Date(s.expiresAt).getTime();
+    return exp > now;
+  });
+}
+
+function renderPostsGrid(posts) {
+  if (!posts.length) return `<p class="text-muted text-sm" style="padding:1rem 0">No posts yet.</p>`;
+  return `<div class="ph-gallery">${posts.map(p => {
+    const isVideo = (p.mediaType || '').startsWith('video/');
+    return `<div class="ph-gallery__item" ${isVideo ? '' : `onclick="phOpenLightbox('${escapeHtml(p.mediaUrl)}')"`}>
+      ${isVideo ? `<video src="${escapeHtml(p.mediaUrl)}" controls style="width:100%;height:100%;object-fit:cover"></video>`
+                : `<img src="${escapeHtml(p.mediaUrl)}" loading="lazy">`}
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderStoriesRow(stories) {
+  if (!stories.length) return `<p class="text-muted text-sm" style="padding:1rem 0">No active stories.</p>`;
+  return `<div class="ph-stories-row">${stories.map(s => {
+    const isVideo = (s.mediaType || '').startsWith('video/');
+    return `<div class="story-thumb" ${isVideo ? '' : `onclick="phOpenLightbox('${escapeHtml(s.mediaUrl)}')"`}>
+      ${isVideo ? `<video src="${escapeHtml(s.mediaUrl)}" controls style="width:100%;height:100%;object-fit:cover"></video>`
+                : `<img src="${escapeHtml(s.mediaUrl)}" style="width:100%;height:100%;object-fit:cover">`}
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderSuperFunSection(model, posts, stories) {
+  if (!state.pleasureUser) return `<p class="text-muted text-sm" style="padding:1rem 0">Log in to subscribe.</p>`;
+  if (currentSubStatus === 'active') {
+    return `
+      <p class="ph-profile-bio">${escapeHtml(model.superFunBio || '')}</p>
+      <div class="ph-profile-section-label">Stories</div>
+      ${renderStoriesRow(stories)}
+      <div class="ph-profile-section-label mt-2">Posts</div>
+      ${renderPostsGrid(posts)}`;
+  }
+  const statusMsg = currentSubStatus === 'pending'
+    ? `<p class="text-sm text-muted">Your subscription request is pending approval.</p>`
+    : currentSubStatus === 'revoked'
+    ? `<p class="text-sm text-muted">Your access was revoked. You can request again.</p>`
+    : `<p class="text-sm text-muted">Subscribe to unlock ${escapeHtml(model.stageName)}'s exclusive Super Fun content.</p>`;
+  const showBtn = currentSubStatus !== 'pending';
+  return `
+    <div class="ph-superfun-lock">
+      <div style="font-size:2.5rem">🔒</div>
+      ${statusMsg}
+      ${showBtn ? `<button class="btn btn-gold mt-2" onclick="requestSubscription('${model.id}', ${JSON.stringify(escapeHtml(model.stageName))})">Request Subscription</button>` : ''}
+    </div>`;
+}
+
+// ── SUBSCRIBE TO SUPER FUN ──────────────────────────────────────────────
+window.requestSubscription = async (modelId, modelName) => {
+  if (!state.pleasureUser) return toast('Please log in', 'error');
+  const subId = `${state.pleasureUser.id}_${modelId}`;
+  await setDoc(doc(db, 'subscriptions', subId), {
+    fanId: state.pleasureUser.id,
+    fanName: state.pleasureUser.displayName,
+    modelId,
+    modelName,
+    status: 'pending',
+    requestedAt: serverTimestamp()
+  }, { merge: true });
+  await addDoc(collection(db, 'notifications'), {
+    userId: modelId, message: `${state.pleasureUser.displayName} requested access to your Super Fun profile.`,
+    read: false, createdAt: serverTimestamp()
+  });
+  toast('Subscription request sent. The model will approve access once payment is confirmed off-platform.', 'success');
+  openModelProfile(modelId);
 };
 
 window.closePHProfile = () => {
@@ -454,6 +583,99 @@ window.switchPleasureTab = (btn, id) => {
   container.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   if (btn) btn.classList.add('active');
   document.getElementById(id).classList.add('active');
+};
+
+/* ════════════════════════════════════════════════════════════════════
+   SERVICE REQUESTS — fan side
+   ════════════════════════════════════════════════════════════════════ */
+window.openRequestServiceModal = (modelId, modelName) => {
+  const model = allModels.find(m => m.id === modelId);
+  if (!model) return;
+  const svcOptions = allServices.filter(s => model.selectedServices?.includes(s.id));
+  document.getElementById('req-svc-model-id').value = modelId;
+  document.getElementById('req-svc-model-name').value = modelName;
+  document.getElementById('req-svc-title').textContent = `Request a service from ${modelName}`;
+  const sel = document.getElementById('req-svc-select');
+  sel.innerHTML = svcOptions.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
+  document.getElementById('req-svc-message').value = '';
+  document.getElementById('req-svc-modal').classList.remove('hidden');
+};
+
+window.closeRequestServiceModal = () => {
+  document.getElementById('req-svc-modal').classList.add('hidden');
+};
+
+window.submitServiceRequest = async () => {
+  if (!state.pleasureUser) return toast('Please log in', 'error');
+  const modelId   = document.getElementById('req-svc-model-id').value;
+  const modelName = document.getElementById('req-svc-model-name').value;
+  const svcSelect = document.getElementById('req-svc-select');
+  const serviceId = svcSelect.value;
+  const serviceName = svcSelect.options[svcSelect.selectedIndex]?.textContent || '';
+  const message = document.getElementById('req-svc-message').value.trim();
+  if (!serviceId) return toast('Select a service', 'error');
+
+  await addDoc(collection(db, 'serviceRequests'), {
+    fanId: state.pleasureUser.id,
+    fanName: state.pleasureUser.displayName,
+    modelId, modelName,
+    serviceId, serviceName,
+    message,
+    status: 'pending',
+    createdAt: serverTimestamp()
+  });
+  await addDoc(collection(db, 'notifications'), {
+    userId: modelId, message: `${state.pleasureUser.displayName} requested "${serviceName}".`,
+    read: false, createdAt: serverTimestamp()
+  });
+  closeRequestServiceModal();
+  closePHProfile();
+  toast('Service request sent!', 'success');
+};
+
+// ── MY REQUESTS (fan dashboard tab) ─────────────────────────────────────
+export async function loadFanServiceRequests() {
+  if (!state.pleasureUser) return;
+  const list = document.getElementById('ph-my-requests-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loader"></div>';
+
+  const snap = await getDocs(query(
+    collection(db, 'serviceRequests'),
+    where('fanId', '==', state.pleasureUser.id),
+    orderBy('createdAt', 'desc')
+  ));
+
+  if (snap.empty) { list.innerHTML = '<p class="text-muted">You haven\'t requested any services yet.</p>'; return; }
+
+  list.innerHTML = snap.docs.map(d => {
+    const r = d.data();
+    let action = '';
+    if (r.status === 'accepted' && r.conversationId) {
+      action = `<button class="btn btn-gold btn-sm" onclick="openFanServiceChat('${r.conversationId}', ${JSON.stringify(escapeHtml(r.modelName))})">Open Chat</button>`;
+    }
+    return `<div class="card flex justify-between items-center" style="flex-wrap:wrap;gap:.5rem">
+      <div>
+        <div><strong>${escapeHtml(r.serviceName)}</strong> from <strong class="gold">${escapeHtml(r.modelName)}</strong></div>
+        <div class="mt-1">${badge('request_' + r.status)}</div>
+      </div>
+      <div>${action}</div>
+    </div>`;
+  }).join('');
+}
+
+window.openFanServiceChat = (conversationId, modelName) => {
+  activeChat = { conversationId, modelId: null, modelName };
+  openChatBox(conversationId, modelName);
+};
+
+window.phDashTab = (btn, id) => {
+  document.querySelectorAll('#view-pleasurehub-dashboard .tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#view-pleasurehub-dashboard .tab-content').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(id)?.classList.add('active');
+  if (id === 'ph-tab-requests') loadFanServiceRequests();
+  if (id === 'ph-tab-discover') loadModelsForPleasure();
 };
 
 // ── HANDLE LOGGED-IN PLEASURE USER ───────────────────────────────────
