@@ -13,7 +13,17 @@ export const state = {
   editSvcId:         null,
   currentFilter:     'all',
   sigPads:           {},
-  globalServicesList: []
+  globalServicesList: [],
+
+  // ── Commission / platform settings ──────────────────────────────────
+  commissionSettings: { ratePercent: 15, paymentDeadlineDays: 7 },
+
+  // ── Service requests (fan <-> model) ────────────────────────────────
+  activeServiceRequest: null,   // currently open service request id (model side)
+  activeModelChat:      null,
+
+  // ── Content studio (model side) ─────────────────────────────────────
+  contentTab: 'feed'            // 'feed' | 'superfun' — which gallery the studio is editing
 };
 
 export const ADMIN_EMAILS = ['admin@ei8instudios.com', 'studio@ei8in.com'];
