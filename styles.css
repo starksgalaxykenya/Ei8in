@@ -852,3 +852,56 @@ tbody tr:hover { background:var(--sfr) }
   background: var(--sfrr);
   flex-shrink: 0;
 }
+
+/* ── STORIES ROW ────────────────────────────────────────────────── */
+.ph-stories-row {
+  display: flex;
+  gap: .6rem;
+  overflow-x: auto;
+  padding-bottom: .25rem;
+}
+.story-thumb {
+  position: relative;
+  flex: 0 0 auto;
+  width: 90px;
+  height: 130px;
+  border-radius: .6rem;
+  overflow: hidden;
+  background: var(--sfrr);
+  border: 1.5px solid var(--gold-d);
+  cursor: pointer;
+}
+.story-thumb img, .story-thumb video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.story-thumb__del {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,.6);
+  color: #fff;
+  font-size: .65rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── SUPER FUN LOCK ─────────────────────────────────────────────── */
+.ph-superfun-lock {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  background: var(--sfr);
+  border: 1px dashed var(--border-b);
+  border-radius: .75rem;
+}
+
+/* ── CONTENT STUDIO ─────────────────────────────────────────────── */
+.cs-panel.hidden { display: none; }
