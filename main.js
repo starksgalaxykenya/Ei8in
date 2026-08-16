@@ -1,9 +1,9 @@
 // ── MAIN ENTRY POINT ─────────────────────────────────────────────────
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { auth, db } from './firebase-config.js';
 import { state, ADMIN_EMAILS } from './state.js';
-import { showView } from './utils.js';
+import { showView, toast } from './utils.js';
 import { loadModelDoc, routeModel } from './model.js';
 import { loadAdminData } from './admin.js';
 
@@ -23,6 +23,13 @@ function initAuth() {
       const modelSnap = await getDoc(doc(db, 'models', user.uid));
       if (modelSnap.exists()) {
         state.modelData = { id: modelSnap.id, ...modelSnap.data() };
+        if (state.modelData.banned) {
+          await signOut(auth);
+          state.modelData = null;
+          toast('Your account has been suspended for unpaid commission. Contact support.', 'error');
+          showView('view-model-auth');
+          return;
+        }
         routeModel();
         return;
       }
